@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'mobile/**'
-      - '.github/workflows/mobile.yml'
+      - "mobile/**"
+      - ".github/workflows/mobile.yml"
   pull_request:
     branches: [main]
     paths:
-      - 'mobile/**'
-      - '.github/workflows/mobile.yml'
+      - "mobile/**"
+      - ".github/workflows/mobile.yml"
 
 jobs:
   test:
@@ -24,8 +24,8 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Get dependencies
@@ -59,14 +59,14 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Get dependencies
@@ -89,8 +89,8 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          flutter-version: "3.38.3"
+          channel: "stable"
           cache: true
 
       - name: Get dependencies

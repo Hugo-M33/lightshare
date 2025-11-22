@@ -10,8 +10,8 @@ import (
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
-	Redis    RedisConfig
 	JWT      JWTConfig
+	Redis    RedisConfig
 }
 
 // ServerConfig holds server-related configuration

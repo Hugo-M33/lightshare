@@ -26,9 +26,9 @@ func Health(version string) fiber.Handler {
 
 // ReadyResponse represents the readiness check response
 type ReadyResponse struct {
-	Status   string            `json:"status"`
-	Checks   map[string]string `json:"checks"`
-	Ready    bool              `json:"ready"`
+	Checks map[string]string `json:"checks"`
+	Status string            `json:"status"`
+	Ready  bool              `json:"ready"`
 }
 
 // Ready returns the readiness check handler

@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/gofiber/fiber/v2"
+
 	"github.com/lightshare/backend/internal/config"
 	"github.com/lightshare/backend/internal/handlers"
 	"github.com/lightshare/backend/internal/middleware"
@@ -104,7 +105,7 @@ func errorHandler(c *fiber.Ctx, err error) error {
 
 	// Return JSON error response
 	return c.Status(code).JSON(fiber.Map{
-		"error":   message,
-		"status":  code,
+		"error":  message,
+		"status": code,
 	})
 }

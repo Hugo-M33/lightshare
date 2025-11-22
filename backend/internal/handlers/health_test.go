@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -12,7 +13,7 @@ func TestHealth(t *testing.T) {
 	app := fiber.New()
 	app.Get("/health", Health("1.0.0"))
 
-	req := httptest.NewRequest("GET", "/health", nil)
+	req := httptest.NewRequest("GET", "/health", http.NoBody)
 	resp, err := app.Test(req)
 	if err != nil {
 		t.Fatalf("Failed to test request: %v", err)
@@ -40,7 +41,7 @@ func TestReady(t *testing.T) {
 	app := fiber.New()
 	app.Get("/ready", Ready())
 
-	req := httptest.NewRequest("GET", "/ready", nil)
+	req := httptest.NewRequest("GET", "/ready", http.NoBody)
 	resp, err := app.Test(req)
 	if err != nil {
 		t.Fatalf("Failed to test request: %v", err)
