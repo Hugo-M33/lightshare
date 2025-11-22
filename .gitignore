@@ -1,0 +1,141 @@
+# Dependencies
+node_modules/
+
+# Go
+backend/vendor/
+
+# Flutter
+mobile/.dart_tool/
+mobile/.packages
+mobile/.pub/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/pubspec.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+*.env
+
+# Build
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test
+coverage/
+*.out
+*.test
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Temporary
+tmp/
+temp/
+
+# Secrets (never commit these)
+*.pem
+*.key
+credentials.json
+service-account.json
+
+############################
+# Backend (Go)
+############################
+
+backend/**/*.exe
+backend/**/*.exe~
+backend/**/*.dll
+backend/**/*.so
+backend/**/*.dylib
+backend/**/*.test
+backend/**/*.out
+
+# Go workspace files
+backend/go.work
+backend/go.work.sum
+
+# Build artifacts
+backend/bin/
+backend/build/
+backend/dist/
+
+# Vendored dependencies
+backend/vendor/
+
+############################
+# Mobile (Flutter / Dart)
+############################
+
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+.mobile/pub-cache/
+mobile/build/
+mobile/.fvm/
+mobile/.fvmrc
+mobile/.melos_tool/
+
+# iOS
+mobile/ios/Pods/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/Flutter/Generated.xcconfig
+mobile/ios/Runner/GeneratedPluginRegistrant.*
+mobile/ios/.symlinks/
+mobile/ios/Flutter/App.framework
+mobile/ios/ServiceDefinitions.json
+mobile/ios/Podfile.lock
+
+# Android
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/local.properties
+mobile/android/**/GeneratedPluginRegistrant.java
+
+############################
+# Flutter Web (if used)
+############################
+mobile/web/.dart_tool/
+
+############################
+# Tooling / Global
+############################
+
+# Node
+node_modules/
+
+# Editors
+.idea/
+*.iml
+.vscode/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+

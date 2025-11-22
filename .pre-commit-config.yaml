@@ -1,0 +1,41 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v1.55.2
+    hooks:
+      - id: golangci-lint
+        entry: golangci-lint run --fix
+        args: ["--config=backend/.golangci.yml"]
+        files: ^backend/
+
+  - repo: local
+    hooks:
+      - id: go-mod-tidy
+        name: go mod tidy
+        entry: bash -c 'cd backend && go mod tidy'
+        language: system
+        files: ^backend/go\.(mod|sum)$
+        pass_filenames: false
+
+      - id: flutter-analyze
+        name: flutter analyze
+        entry: bash -c 'cd mobile && flutter analyze'
+        language: system
+        files: ^mobile/.*\.dart$
+        pass_filenames: false
+
+      - id: flutter-format
+        name: flutter format
+        entry: bash -c 'cd mobile && dart format --set-exit-if-changed lib test'
+        language: system
+        files: ^mobile/.*\.dart$
+        pass_filenames: false
