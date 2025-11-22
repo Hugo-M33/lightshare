@@ -251,7 +251,7 @@ func (s *AuthService) LoginWithMagicLink(ctx context.Context, token string, user
 // RefreshToken refreshes an access token using a refresh token
 func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string, userAgent, ipAddress *string) (*LoginResponse, error) {
 	// Validate refresh token
-	claims, err := s.jwtService.ValidateRefreshToken(refreshToken)
+	_, err := s.jwtService.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return nil, err
 	}
