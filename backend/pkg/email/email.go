@@ -2,12 +2,12 @@ package email
 
 import (
 	"bytes"
-	"crypto/tls"
 	"fmt"
 	"html/template"
-	"net"
-	"net/smtp"
+	"strconv"
 	"strings"
+
+	"gopkg.in/gomail.v2"
 )
 
 // Config holds email service configuration
@@ -24,12 +24,23 @@ type Config struct {
 // Service handles email sending
 type Service struct {
 	config Config
+	dialer *gomail.Dialer
 }
 
 // New creates a new email service
 func New(cfg Config) *Service {
+	port, err := strconv.Atoi(cfg.SMTPPort)
+	if err != nil {
+		port = 587 // default to standard SMTP submission port
+	}
+
+	dialer := gomail.NewDialer(cfg.SMTPHost, port, cfg.SMTPUsername, cfg.SMTPPassword)
+	// Use SSL for port 465, STARTTLS for others (587, 25)
+	dialer.SSL = (port == 465)
+
 	return &Service{
 		config: cfg,
+		dialer: dialer,
 	}
 }
 
@@ -41,88 +52,28 @@ type EmailMessage struct {
 	IsHTML  bool
 }
 
-// Send sends an email with TLS support
+// Send sends an email using gomail (supports OVH and other SMTP providers)
 func (s *Service) Send(msg EmailMessage) error {
-	from := fmt.Sprintf("%s <%s>", s.config.FromName, s.config.FromEmail)
-	addr := fmt.Sprintf("%s:%s", s.config.SMTPHost, s.config.SMTPPort)
+	m := gomail.NewMessage()
 
-	// Build email headers
-	headers := make(map[string]string)
-	headers["From"] = from
-	headers["To"] = msg.To
-	headers["Subject"] = msg.Subject
+	// Set headers
+	m.SetHeader("From", fmt.Sprintf("%s <%s>", s.config.FromName, s.config.FromEmail))
+	m.SetHeader("To", msg.To)
+	m.SetHeader("Subject", msg.Subject)
+
+	// Set body
 	if msg.IsHTML {
-		headers["MIME-Version"] = "1.0"
-		headers["Content-Type"] = "text/html; charset=UTF-8"
+		m.SetBody("text/html", msg.Body)
+	} else {
+		m.SetBody("text/plain", msg.Body)
 	}
 
-	// Build message
-	message := ""
-	for k, v := range headers {
-		message += fmt.Sprintf("%s: %s\r\n", k, v)
-	}
-	message += "\r\n" + msg.Body
-
-	// Connect to SMTP server
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		return fmt.Errorf("failed to connect to SMTP server: %w", err)
-	}
-	defer conn.Close()
-
-	// Create SMTP client
-	client, err := smtp.NewClient(conn, s.config.SMTPHost)
-	if err != nil {
-		return fmt.Errorf("failed to create SMTP client: %w", err)
-	}
-	defer client.Close()
-
-	// Start TLS if using port 587 (STARTTLS)
-	if s.config.SMTPPort == "587" {
-		tlsConfig := &tls.Config{
-			ServerName: s.config.SMTPHost,
-		}
-		if err = client.StartTLS(tlsConfig); err != nil {
-			return fmt.Errorf("failed to start TLS: %w", err)
-		}
+	// Send email
+	if err := s.dialer.DialAndSend(m); err != nil {
+		return fmt.Errorf("failed to send email: %w", err)
 	}
 
-	// Authenticate if credentials provided
-	if s.config.SMTPUsername != "" && s.config.SMTPPassword != "" {
-		auth := smtp.PlainAuth("", s.config.SMTPUsername, s.config.SMTPPassword, s.config.SMTPHost)
-		if err = client.Auth(auth); err != nil {
-			return fmt.Errorf("failed to authenticate: %w", err)
-		}
-	}
-
-	// Set sender
-	if err = client.Mail(s.config.FromEmail); err != nil {
-		return fmt.Errorf("failed to set sender: %w", err)
-	}
-
-	// Set recipient
-	if err = client.Rcpt(msg.To); err != nil {
-		return fmt.Errorf("failed to set recipient: %w", err)
-	}
-
-	// Send message body
-	writer, err := client.Data()
-	if err != nil {
-		return fmt.Errorf("failed to get data writer: %w", err)
-	}
-
-	_, err = writer.Write([]byte(message))
-	if err != nil {
-		return fmt.Errorf("failed to write message: %w", err)
-	}
-
-	err = writer.Close()
-	if err != nil {
-		return fmt.Errorf("failed to close writer: %w", err)
-	}
-
-	// Send QUIT
-	return client.Quit()
+	return nil
 }
 
 // SendVerificationEmail sends an email verification email
