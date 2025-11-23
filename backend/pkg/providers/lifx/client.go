@@ -195,7 +195,8 @@ func (c *Client) ListDevices(token string) ([]*Device, error) {
 
 	// Convert LIFX response to unified Device format
 	devices := make([]*Device, 0, len(lights))
-	for _, light := range lights {
+	for i := range lights {
+		light := &lights[i]
 		capabilities := []string{}
 
 		// All LIFX lights support brightness
@@ -208,11 +209,8 @@ func (c *Client) ListDevices(token string) ([]*Device, error) {
 			capabilities = append(capabilities, "color")
 		}
 
-		// All LIFX lights support color temperature
-		capabilities = append(capabilities, "temperature")
-
-		// All LIFX lights support effects
-		capabilities = append(capabilities, "effects")
+		// All LIFX lights support color temperature and effects
+		capabilities = append(capabilities, "temperature", "effects")
 
 		device := &Device{
 			ID:         light.ID,
@@ -330,7 +328,7 @@ func (c *Client) SetPower(token, selector string, state bool, duration float64) 
 }
 
 // SetBrightness adjusts the brightness level
-func (c *Client) SetBrightness(token, selector string, level float64, duration float64) error {
+func (c *Client) SetBrightness(token, selector string, level, duration float64) error {
 	body := map[string]interface{}{
 		"brightness": level,
 		"duration":   duration,

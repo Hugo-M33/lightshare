@@ -7,6 +7,13 @@ import (
 	"github.com/lightshare/backend/internal/services"
 )
 
+// Error message constants
+const (
+	errAccountNotFound    = "account not found: account not found"
+	errUnauthorizedAccess = "unauthorized: user does not own this account"
+	errRateLimitExceeded  = "rate limit exceeded: max 30 requests per minute"
+)
+
 // DeviceHandler handles device-related HTTP requests
 type DeviceHandler struct {
 	deviceService *services.DeviceService
@@ -52,10 +59,10 @@ func (h *DeviceHandler) ListAccountDevices(c *fiber.Ctx) error {
 
 	devices, err := h.deviceService.ListAccountDevices(c.Context(), userID.String(), accountID)
 	if err != nil {
-		if err.Error() == "account not found: account not found" {
+		if err.Error() == errAccountNotFound {
 			return fiber.NewError(fiber.StatusNotFound, "account not found")
 		}
-		if err.Error() == "unauthorized: user does not own this account" {
+		if err.Error() == errUnauthorizedAccess {
 			return fiber.NewError(fiber.StatusForbidden, "unauthorized")
 		}
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to list devices")
@@ -86,13 +93,13 @@ func (h *DeviceHandler) GetDevice(c *fiber.Ctx) error {
 
 	device, err := h.deviceService.GetDevice(c.Context(), userID.String(), accountID, deviceID)
 	if err != nil {
-		if err.Error() == "account not found: account not found" {
+		if err.Error() == errAccountNotFound {
 			return fiber.NewError(fiber.StatusNotFound, "account not found")
 		}
-		if err.Error() == "unauthorized: user does not own this account" {
+		if err.Error() == errUnauthorizedAccess {
 			return fiber.NewError(fiber.StatusForbidden, "unauthorized")
 		}
-		if err.Error() == "rate limit exceeded: max 30 requests per minute" {
+		if err.Error() == errRateLimitExceeded {
 			return fiber.NewError(fiber.StatusTooManyRequests, "rate limit exceeded")
 		}
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to get device")
@@ -131,13 +138,13 @@ func (h *DeviceHandler) ExecuteAction(c *fiber.Ctx) error {
 
 	err := h.deviceService.ExecuteAction(c.Context(), userID.String(), accountID, selector, &action)
 	if err != nil {
-		if err.Error() == "account not found: account not found" {
+		if err.Error() == errAccountNotFound {
 			return fiber.NewError(fiber.StatusNotFound, "account not found")
 		}
-		if err.Error() == "unauthorized: user does not own this account" {
+		if err.Error() == errUnauthorizedAccess {
 			return fiber.NewError(fiber.StatusForbidden, "unauthorized")
 		}
-		if err.Error() == "rate limit exceeded: max 30 requests per minute" {
+		if err.Error() == errRateLimitExceeded {
 			return fiber.NewError(fiber.StatusTooManyRequests, "rate limit exceeded")
 		}
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to execute action")

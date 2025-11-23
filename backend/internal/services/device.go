@@ -127,8 +127,8 @@ func (s *DeviceService) GetDevice(ctx context.Context, userID, accountID, device
 	}
 
 	// Check rate limit
-	if err := s.checkRateLimit(ctx, accountID); err != nil {
-		return nil, err
+	if rateLimitErr := s.checkRateLimit(ctx, accountID); rateLimitErr != nil {
+		return nil, rateLimitErr
 	}
 
 	// Get decrypted token
@@ -173,8 +173,8 @@ func (s *DeviceService) ExecuteAction(ctx context.Context, userID, accountID, se
 	}
 
 	// Check rate limit
-	if err := s.checkRateLimit(ctx, accountID); err != nil {
-		return err
+	if rateLimitErr := s.checkRateLimit(ctx, accountID); rateLimitErr != nil {
+		return rateLimitErr
 	}
 
 	// Get decrypted token
@@ -216,9 +216,9 @@ func (s *DeviceService) RefreshDevices(ctx context.Context, userID, accountID st
 	}
 
 	// Invalidate cache
-	if err := s.invalidateCache(ctx, accountID); err != nil {
+	if invalidateErr := s.invalidateCache(ctx, accountID); invalidateErr != nil {
 		// Log error but continue
-		_ = err
+		_ = invalidateErr
 	}
 
 	// Fetch fresh data from provider

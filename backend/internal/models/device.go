@@ -1,5 +1,11 @@
 package models
 
+// Power state constants
+const (
+	PowerStateOn  = "on"
+	PowerStateOff = "off"
+)
+
 // Device represents a smart light device from any provider (LIFX, Hue, etc.)
 type Device struct {
 	Group        *DeviceGroup           `json:"group,omitempty"`
@@ -38,7 +44,7 @@ type DeviceLocation struct {
 
 // IsOn returns true if the device is powered on
 func (d *Device) IsOn() bool {
-	return d.Power == "on"
+	return d.Power == PowerStateOn
 }
 
 // HasCapability checks if the device supports a specific capability

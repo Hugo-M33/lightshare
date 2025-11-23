@@ -62,7 +62,7 @@ func (a *ActionRequest) validatePowerParameters() error {
 	if !ok {
 		return fmt.Errorf("missing or invalid 'state' parameter (must be string)")
 	}
-	if state != "on" && state != "off" {
+	if state != PowerStateOn && state != PowerStateOff {
 		return fmt.Errorf("invalid state value: %s (must be 'on' or 'off')", state)
 	}
 	return nil
@@ -147,7 +147,7 @@ func (a *ActionRequest) GetPowerState() (bool, error) {
 	if !ok {
 		return false, fmt.Errorf("invalid state parameter")
 	}
-	return state == "on", nil
+	return state == PowerStateOn, nil
 }
 
 // GetBrightnessLevel returns the brightness level for brightness actions

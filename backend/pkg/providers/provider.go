@@ -185,7 +185,7 @@ func (a *lifxClientAdapter) SetPower(token, selector string, state bool, duratio
 }
 
 // SetBrightness adjusts device brightness
-func (a *lifxClientAdapter) SetBrightness(token, selector string, level float64, duration float64) error {
+func (a *lifxClientAdapter) SetBrightness(token, selector string, level, duration float64) error {
 	return a.client.SetBrightness(token, selector, level, duration)
 }
 
