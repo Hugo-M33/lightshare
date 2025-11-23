@@ -128,7 +128,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             end: Alignment.bottomRight,
             colors: [
               AppTheme.darkBackground,
-              AppTheme.accentPink.withOpacity(0.2),
+              AppTheme.accentPink.withValues(alpha: 0.2),
               AppTheme.darkBackground,
             ],
           ),
@@ -147,7 +147,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       onPressed: () => context.pop(),
                       icon: const Icon(Icons.arrow_back),
                       style: IconButton.styleFrom(
-                        backgroundColor: AppTheme.cardBackground.withOpacity(0.5),
+                        backgroundColor: AppTheme.cardBackground.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -329,13 +329,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [
-                AppTheme.accentPink.withOpacity(0.3),
-                AppTheme.primaryPurple.withOpacity(0.3),
+                AppTheme.accentPink.withValues(alpha: 0.3),
+                AppTheme.primaryPurple.withValues(alpha: 0.3),
               ],
             ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.accentPink.withOpacity(0.4),
+                color: AppTheme.accentPink.withValues(alpha: 0.4),
                 blurRadius: 30,
                 spreadRadius: 5,
               ),

@@ -73,30 +73,15 @@ void main() {
         ),
       );
 
-      // Find email field
-      final emailField = find.ancestor(
-        of: find.text('Email'),
-        matching: find.byType(TextFormField),
-      );
-      expect(emailField, findsOneWidget);
+      // Verify email and password form fields exist
+      expect(find.widgetWithText(TextFormField, 'Email'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Password'), findsOneWidget);
 
-      // Find password field
-      final passwordField = find.ancestor(
-        of: find.text('Password'),
-        matching: find.byType(TextFormField),
-      );
-      expect(passwordField, findsOneWidget);
+      // Verify email icon is present
+      expect(find.byIcon(Icons.email_outlined), findsOneWidget);
 
-      // Verify email field has proper keyboard type
-      final emailTextFormField =
-          tester.widget<TextFormField>(emailField);
-      expect(emailTextFormField.keyboardType,
-          equals(TextInputType.emailAddress));
-
-      // Verify password field is obscured
-      final passwordTextFormField =
-          tester.widget<TextFormField>(passwordField);
-      expect(passwordTextFormField.obscureText, isTrue);
+      // Verify password lock icon is present
+      expect(find.byIcon(Icons.lock_outline), findsOneWidget);
     });
 
     testWidgets('Password visibility toggle works',

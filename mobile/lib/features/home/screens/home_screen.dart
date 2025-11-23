@@ -21,8 +21,8 @@ class HomeScreen extends ConsumerWidget {
             end: Alignment.bottomRight,
             colors: [
               AppTheme.darkBackground,
-              AppTheme.primaryPurple.withOpacity(0.2),
-              AppTheme.accentPink.withOpacity(0.1),
+              AppTheme.primaryPurple.withValues(alpha: 0.2),
+              AppTheme.accentPink.withValues(alpha: 0.1),
               AppTheme.darkBackground,
             ],
           ),
@@ -41,14 +41,14 @@ class HomeScreen extends ConsumerWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            AppTheme.primaryPurple.withOpacity(0.3),
-                            AppTheme.accentPink.withOpacity(0.3),
+                            AppTheme.primaryPurple.withValues(alpha: 0.3),
+                            AppTheme.accentPink.withValues(alpha: 0.3),
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.primaryPurple.withOpacity(0.3),
+                            color: AppTheme.primaryPurple.withValues(alpha: 0.3),
                             blurRadius: 20,
                           ),
                         ],
@@ -70,7 +70,7 @@ class HomeScreen extends ConsumerWidget {
                       icon: const Icon(Icons.logout),
                       style: IconButton.styleFrom(
                         backgroundColor:
-                            AppTheme.cardBackground.withOpacity(0.5),
+                            AppTheme.cardBackground.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -142,9 +142,9 @@ class HomeScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -281,7 +281,7 @@ class HomeScreen extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppTheme.primaryPurple.withOpacity(0.2),
+            color: AppTheme.primaryPurple.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 20, color: AppTheme.primaryPurple),

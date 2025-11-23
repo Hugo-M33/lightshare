@@ -16,15 +16,13 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
 
-      colorScheme: ColorScheme.dark(
+      colorScheme: const ColorScheme.dark(
         primary: primaryPurple,
         secondary: accentPink,
         surface: cardBackground,
-        background: darkBackground,
         onPrimary: textPrimary,
         onSecondary: textPrimary,
         onSurface: textPrimary,
-        onBackground: textPrimary,
       ),
 
       scaffoldBackgroundColor: darkBackground,
@@ -62,14 +60,14 @@ class AppTheme {
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: cardBackground.withOpacity(0.5),
+        fillColor: cardBackground.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: glassBorder, width: 1),
+          borderSide: const BorderSide(color: glassBorder, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: glassBorder, width: 1),
+          borderSide: const BorderSide(color: glassBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),

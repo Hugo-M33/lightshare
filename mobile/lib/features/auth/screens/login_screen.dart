@@ -71,7 +71,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             end: Alignment.bottomRight,
             colors: [
               AppTheme.darkBackground,
-              AppTheme.deepPurple.withOpacity(0.3),
+              AppTheme.deepPurple.withValues(alpha: 0.3),
               AppTheme.darkBackground,
             ],
           ),
@@ -222,13 +222,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [
-                AppTheme.primaryPurple.withOpacity(0.3),
-                AppTheme.accentPink.withOpacity(0.3),
+                AppTheme.primaryPurple.withValues(alpha: 0.3),
+                AppTheme.accentPink.withValues(alpha: 0.3),
               ],
             ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.primaryPurple.withOpacity(0.5),
+                color: AppTheme.primaryPurple.withValues(alpha: 0.5),
                 blurRadius: 40,
                 spreadRadius: 10,
               ),

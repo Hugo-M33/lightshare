@@ -114,7 +114,7 @@ class _MagicLinkScreenState extends ConsumerState<MagicLinkScreen> {
             end: Alignment.bottomRight,
             colors: [
               AppTheme.darkBackground,
-              AppTheme.primaryPurple.withOpacity(0.3),
+              AppTheme.primaryPurple.withValues(alpha: 0.3),
               AppTheme.darkBackground,
             ],
           ),
@@ -134,7 +134,7 @@ class _MagicLinkScreenState extends ConsumerState<MagicLinkScreen> {
                       icon: const Icon(Icons.arrow_back),
                       style: IconButton.styleFrom(
                         backgroundColor:
-                            AppTheme.cardBackground.withOpacity(0.5),
+                            AppTheme.cardBackground.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -163,13 +163,13 @@ class _MagicLinkScreenState extends ConsumerState<MagicLinkScreen> {
             shape: BoxShape.circle,
             gradient: LinearGradient(
               colors: [
-                AppTheme.primaryPurple.withOpacity(0.3),
-                AppTheme.accentPink.withOpacity(0.3),
+                AppTheme.primaryPurple.withValues(alpha: 0.3),
+                AppTheme.accentPink.withValues(alpha: 0.3),
               ],
             ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.primaryPurple.withOpacity(0.5),
+                color: AppTheme.primaryPurple.withValues(alpha: 0.5),
                 blurRadius: 40,
                 spreadRadius: 10,
               ),
@@ -248,7 +248,7 @@ class _MagicLinkScreenState extends ConsumerState<MagicLinkScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.green.withOpacity(0.2),
+              color: Colors.green.withValues(alpha: 0.2),
             ),
             child: const Icon(
               Icons.mark_email_read,
@@ -297,7 +297,7 @@ class _MagicLinkScreenState extends ConsumerState<MagicLinkScreen> {
             end: Alignment.bottomCenter,
             colors: [
               AppTheme.darkBackground,
-              AppTheme.primaryPurple.withOpacity(0.2),
+              AppTheme.primaryPurple.withValues(alpha: 0.2),
               AppTheme.darkBackground,
             ],
           ),

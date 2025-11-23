@@ -79,7 +79,7 @@ class _EmailVerificationScreenState
             end: Alignment.bottomCenter,
             colors: [
               AppTheme.darkBackground,
-              AppTheme.primaryPurple.withOpacity(0.2),
+              AppTheme.primaryPurple.withValues(alpha: 0.2),
               AppTheme.darkBackground,
             ],
           ),
@@ -140,13 +140,13 @@ class _EmailVerificationScreenState
         shape: BoxShape.circle,
         gradient: LinearGradient(
           colors: [
-            color.withOpacity(0.3),
-            color.withOpacity(0.1),
+            color.withValues(alpha: 0.3),
+            color.withValues(alpha: 0.1),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.5),
+            color: color.withValues(alpha: 0.5),
             blurRadius: 40,
             spreadRadius: 10,
           ),
