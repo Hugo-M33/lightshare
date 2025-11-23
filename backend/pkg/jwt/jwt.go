@@ -1,3 +1,4 @@
+// Package jwt provides JSON Web Token generation and validation.
 package jwt
 
 import (
@@ -12,8 +13,11 @@ import (
 )
 
 var (
-	ErrInvalidToken     = errors.New("invalid token")
-	ErrTokenExpired     = errors.New("token expired")
+	// ErrInvalidToken is returned when a JWT token is invalid or malformed.
+	ErrInvalidToken = errors.New("invalid token")
+	// ErrTokenExpired is returned when a JWT token has expired.
+	ErrTokenExpired = errors.New("token expired")
+	// ErrInvalidTokenType is returned when a token type (access/refresh) doesn't match the expected type.
 	ErrInvalidTokenType = errors.New("invalid token type")
 )
 
@@ -38,9 +42,9 @@ func New(cfg Config) *Service {
 type Claims struct {
 	UserID uuid.UUID `json:"user_id"`
 	jwt.RegisteredClaims
-	Email  string    `json:"email"`
-	Role   string    `json:"role"`
-	Type   string    `json:"type"` // "access" or "refresh"
+	Email string `json:"email"`
+	Role  string `json:"role"`
+	Type  string `json:"type"` // "access" or "refresh"
 }
 
 // TokenPair represents an access and refresh token pair

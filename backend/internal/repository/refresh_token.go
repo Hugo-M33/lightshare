@@ -1,3 +1,4 @@
+// Package repository provides database access layer for domain entities.
 package repository
 
 import (
@@ -14,8 +15,10 @@ import (
 )
 
 var (
+	// ErrRefreshTokenNotFound is returned when a refresh token is not found in the database.
 	ErrRefreshTokenNotFound = errors.New("refresh token not found")
-	ErrRefreshTokenRevoked  = errors.New("refresh token revoked")
+	// ErrRefreshTokenRevoked is returned when attempting to use a revoked refresh token.
+	ErrRefreshTokenRevoked = errors.New("refresh token revoked")
 )
 
 // RefreshTokenRepository handles refresh token database operations

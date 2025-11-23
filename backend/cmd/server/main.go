@@ -1,3 +1,4 @@
+// Package main is the entry point for the LightShare backend server.
 package main
 
 import (
@@ -50,7 +51,11 @@ func main() {
 		logger.Error("Failed to connect to database", "error", err)
 		os.Exit(1)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.Error("Failed to close database connection", "error", err)
+		}
+	}()
 	logger.Info("Database connected successfully")
 
 	// Initialize Redis
@@ -60,11 +65,18 @@ func main() {
 	})
 	if err != nil {
 		logger.Error("Failed to connect to Redis", "error", err)
+		// Clean up database connection before exiting
+		if closeErr := db.Close(); closeErr != nil {
+			logger.Error("Failed to close database connection during cleanup", "error", closeErr)
+		}
+		//nolint:gocritic // exitAfterDefer is acceptable here as we manually clean up resources
 		os.Exit(1)
 	}
 	defer func() {
 		if redisClient != nil {
-			redisClient.Close()
+			if err := redisClient.Close(); err != nil {
+				logger.Error("Failed to close Redis connection", "error", err)
+			}
 		}
 	}()
 	logger.Info("Redis connected successfully")

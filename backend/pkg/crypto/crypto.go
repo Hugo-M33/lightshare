@@ -1,3 +1,4 @@
+// Package crypto provides cryptographic utilities for password hashing and token operations.
 package crypto
 
 import (

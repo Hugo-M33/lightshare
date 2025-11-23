@@ -1,3 +1,4 @@
+// Package models defines data structures representing domain entities.
 package models
 
 import (

@@ -14,10 +14,14 @@ import (
 )
 
 var (
-	ErrUserNotFound      = errors.New("user not found")
+	// ErrUserNotFound is returned when a user is not found in the database.
+	ErrUserNotFound = errors.New("user not found")
+	// ErrUserAlreadyExists is returned when attempting to create a user with an email that already exists.
 	ErrUserAlreadyExists = errors.New("user already exists")
-	ErrTokenExpired      = errors.New("token expired")
-	ErrTokenNotFound     = errors.New("token not found")
+	// ErrTokenExpired is returned when a verification or magic link token has expired.
+	ErrTokenExpired = errors.New("token expired")
+	// ErrTokenNotFound is returned when a token is not found in the database.
+	ErrTokenNotFound = errors.New("token not found")
 )
 
 // UserRepository handles user database operations

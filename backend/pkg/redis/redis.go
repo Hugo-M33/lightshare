@@ -1,3 +1,4 @@
+// Package redis provides Redis client wrapper with connection management.
 package redis
 
 import (

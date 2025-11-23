@@ -1,3 +1,4 @@
+// Package email provides email sending functionality using SMTP.
 package email
 
 import (
@@ -45,8 +46,8 @@ func New(cfg *Config) *Service {
 	}
 }
 
-// EmailMessage represents an email to send
-type EmailMessage struct {
+// Message represents an email to send
+type Message struct {
 	To      string
 	Subject string
 	Body    string
@@ -54,7 +55,7 @@ type EmailMessage struct {
 }
 
 // Send sends an email using gomail (supports OVH and other SMTP providers)
-func (s *Service) Send(msg EmailMessage) error {
+func (s *Service) Send(msg Message) error {
 	m := gomail.NewMessage()
 
 	// Set headers
@@ -139,7 +140,7 @@ func (s *Service) SendVerificationEmail(to, token string) error {
 		return err
 	}
 
-	return s.Send(EmailMessage{
+	return s.Send(Message{
 		To:      to,
 		Subject: "Verify your LightShare email",
 		Body:    body,
@@ -163,7 +164,7 @@ func (s *Service) SendMagicLinkEmail(to, token string) error {
 		return err
 	}
 
-	return s.Send(EmailMessage{
+	return s.Send(Message{
 		To:      to,
 		Subject: "Your LightShare login link",
 		Body:    body,
@@ -187,7 +188,7 @@ func (s *Service) SendPasswordResetEmail(to, token string) error {
 		return err
 	}
 
-	return s.Send(EmailMessage{
+	return s.Send(Message{
 		To:      to,
 		Subject: "Reset your LightShare password",
 		Body:    body,

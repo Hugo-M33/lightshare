@@ -1,3 +1,5 @@
+version: 2
+
 run:
   timeout: 5m
   tests: true
@@ -5,19 +7,16 @@ run:
 linters:
   enable:
     - bodyclose
+    - copyloopvar
     - dogsled
     - dupl
     - errcheck
-    - exportloopref
     - gochecknoinits
     - goconst
     - gocritic
     - gocyclo
-    - gofmt
-    - goimports
     - goprintffuncname
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - misspell
@@ -26,8 +25,6 @@ linters:
     - nolintlint
     - revive
     - staticcheck
-    - stylecheck
-    - typecheck
     - unconvert
     - unparam
     - unused
@@ -51,9 +48,6 @@ linters-settings:
       - opinionated
       - performance
       - style
-
-  goimports:
-    local-prefixes: github.com/lightshare/backend
 
   govet:
     enable-all: true

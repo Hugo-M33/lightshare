@@ -1,3 +1,4 @@
+// Package services provides business logic layer for the LightShare application.
 package services
 
 import (
@@ -17,9 +18,12 @@ import (
 )
 
 var (
+	// ErrInvalidCredentials is returned when login credentials are invalid.
 	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrEmailNotVerified   = errors.New("email not verified")
-	ErrWeakPassword       = errors.New("password too weak")
+	// ErrEmailNotVerified is returned when attempting to login with an unverified email.
+	ErrEmailNotVerified = errors.New("email not verified")
+	// ErrWeakPassword is returned when a password does not meet minimum requirements.
+	ErrWeakPassword = errors.New("password too weak")
 )
 
 // AuthService handles authentication operations
