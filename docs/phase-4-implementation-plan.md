@@ -108,9 +108,10 @@ type ActionRequest struct {
 
 **Tasks**:
 - [ ] Create `device.go` model with JSON tags
-- [ ] Create `action.go` with action request/response types
+- [ ] Create `action.go` with action request/response types including effect actions
 - [ ] Add validation tags for all fields
 - [ ] Add helper methods (e.g., `IsValidAction()`, `ValidateParameters()`)
+- [ ] Document effect parameters (pulse, breathe with color, cycles, period)
 
 ---
 
@@ -132,15 +133,21 @@ type Client interface {
     SetBrightness(token, selector string, level float64, duration float64) error
     SetColor(token, selector string, color *DeviceColor, duration float64) error
     SetColorTemperature(token, selector string, kelvin int, duration float64) error
+
+    // Effects (LIFX-specific, will return error for Hue)
+    Pulse(token, selector string, color *DeviceColor, cycles int, period float64) error
+    Breathe(token, selector string, color *DeviceColor, cycles int, period float64) error
 }
 
 // Selector format: "all", "id:d073d5", "group_id:xxx", "location_id:xxx"
+// Note: group/location selectors are lower priority - implement "id:xxx" first
 ```
 
 **Tasks**:
 - [ ] Extend `Client` interface with device and control methods
+- [ ] Add effect methods (Pulse, Breathe) to interface
 - [ ] Define `Device` struct in provider package
-- [ ] Add selector pattern documentation
+- [ ] Add selector pattern documentation (prioritize "id:xxx" format)
 - [ ] Add error types for provider-specific errors
 
 #### 2.2 LIFX Client - Device Listing
@@ -310,7 +317,8 @@ func (s *DeviceService) RefreshDevices(ctx context.Context, userID, accountID st
 **Caching Strategy**:
 ```go
 // Cache key format: "devices:account:{account_id}"
-// Cache TTL: 60 seconds (balance between freshness and API rate limits)
+// Cache TTL: Configurable via environment variable, default 60 seconds
+// Balance between freshness and API rate limits
 
 func (s *DeviceService) getCachedDevices(accountID string) ([]*models.Device, error) {
     key := fmt.Sprintf("devices:account:%s", accountID)
@@ -330,6 +338,35 @@ func (s *DeviceService) invalidateCache(accountID string) error {
 }
 ```
 
+**Rate Limiting Strategy**:
+```go
+// LIFX API limit: 120 req/min
+// Our limit: 30 req/min per account (conservative)
+// Use Redis-based sliding window rate limiter
+
+func (s *DeviceService) checkRateLimit(accountID string) error {
+    key := fmt.Sprintf("ratelimit:account:%s", accountID)
+
+    // Increment counter
+    count, err := s.cache.Incr(context.Background(), key).Result()
+    if err != nil {
+        return err
+    }
+
+    // Set expiry on first request
+    if count == 1 {
+        s.cache.Expire(context.Background(), key, 60*time.Second)
+    }
+
+    // Check limit (30 requests per minute)
+    if count > 30 {
+        return fmt.Errorf("rate limit exceeded: max 30 requests per minute")
+    }
+
+    return nil
+}
+```
+
 **Tasks**:
 - [ ] Create `DeviceService` struct with dependencies
 - [ ] Implement `ListDevices()` with caching
@@ -337,8 +374,42 @@ func (s *DeviceService) invalidateCache(accountID string) error {
 - [ ] Implement `ExecuteAction()` with cache invalidation
 - [ ] Implement `RefreshDevices()`
 - [ ] Add access control checks (owner + granted users)
-- [ ] Add rate limiting per account
+- [ ] Add rate limiting per account (30 req/min)
+- [ ] Add configurable cache TTL (env var: `DEVICE_CACHE_TTL_SECONDS`, default: 60)
 - [ ] Write service tests with mocked repos and cache
+
+---
+
+### 3.2 Configuration Updates
+**Location**: `backend/internal/config/config.go`
+
+**Add New Config Fields**:
+```go
+type Config struct {
+    // Existing fields...
+    DatabaseURL       string
+    RedisURL          string
+    JWTSecret         string
+    EncryptionKey     string
+
+    // New Phase 4 fields
+    DeviceCacheTTL    int    `env:"DEVICE_CACHE_TTL_SECONDS" envDefault:"60"`
+    RateLimitPerMin   int    `env:"RATE_LIMIT_PER_MIN" envDefault:"30"`
+}
+```
+
+**Environment Variables**:
+```bash
+# Optional - defaults provided
+DEVICE_CACHE_TTL_SECONDS=60    # How long to cache device lists (seconds)
+RATE_LIMIT_PER_MIN=30          # Max API requests per account per minute
+```
+
+**Tasks**:
+- [ ] Add `DeviceCacheTTL` and `RateLimitPerMin` to Config struct
+- [ ] Update config loading to read these values with defaults
+- [ ] Pass config values to DeviceService constructor
+- [ ] Document in README.md
 
 ---
 
@@ -379,6 +450,7 @@ func (h *DeviceHandler) GetDevice(c *fiber.Ctx) error {
 // POST /api/v1/accounts/:accountId/devices/:selector/action
 // Execute a control action on device(s)
 // selector can be: "all", "id:abc123", "group_id:xxx", "location_id:xxx"
+// Note: group/location selectors are LOWER PRIORITY - focus on "id:xxx" first
 func (h *DeviceHandler) ExecuteAction(c *fiber.Ctx) error {
     userID := c.Locals("user_id").(string)
     accountID := c.Params("accountId")
@@ -763,7 +835,9 @@ class DevicesNotifier extends StateNotifier<DevicesState> {
     }
   }
 
-  // Optimistic brightness change
+  // Optimistic brightness change with debouncing
+  // Note: Debouncing is handled at the widget level (BrightnessSlider)
+  // This method is called only after debounce period expires
   Future<void> setBrightness(String accountId, String deviceId, double level) async {
     final deviceIndex = state.devices.indexWhere((d) => d.id == deviceId);
     if (deviceIndex == -1) return;
@@ -785,7 +859,19 @@ class DevicesNotifier extends StateNotifier<DevicesState> {
     }
   }
 
-  // Set color
+  // Update brightness immediately (for smooth UI), but don't trigger API call
+  // This is used during slider dragging for smooth visual feedback
+  void updateBrightnessLocally(String deviceId, double level) {
+    final deviceIndex = state.devices.indexWhere((d) => d.id == deviceId);
+    if (deviceIndex == -1) return;
+
+    final device = state.devices[deviceIndex];
+    final updatedDevices = List<Device>.from(state.devices);
+    updatedDevices[deviceIndex] = device.copyWith(brightness: level);
+    state = state.copyWith(devices: updatedDevices);
+  }
+
+  // Set color with debouncing (same pattern as brightness)
   Future<void> setColor(String accountId, String deviceId, double hue, double saturation) async {
     final deviceIndex = state.devices.indexWhere((d) => d.id == deviceId);
     if (deviceIndex == -1) return;
@@ -806,6 +892,18 @@ class DevicesNotifier extends StateNotifier<DevicesState> {
       updatedDevices[deviceIndex] = device;
       state = state.copyWith(devices: updatedDevices, error: e.toString());
     }
+  }
+
+  // Update color locally (for smooth UI during color picker dragging)
+  void updateColorLocally(String deviceId, double hue, double saturation) {
+    final deviceIndex = state.devices.indexWhere((d) => d.id == deviceId);
+    if (deviceIndex == -1) return;
+
+    final device = state.devices[deviceIndex];
+    final updatedDevices = List<Device>.from(state.devices);
+    final newColor = DeviceColor(hue: hue, saturation: saturation, kelvin: device.color?.kelvin ?? 3500);
+    updatedDevices[deviceIndex] = device.copyWith(color: newColor);
+    state = state.copyWith(devices: updatedDevices);
   }
 }
 
@@ -929,19 +1027,109 @@ Scaffold
 
 **Create**:
 - `power_toggle.dart` - Large power switch widget
-- `brightness_slider.dart` - Brightness control with percentage
-- `color_picker.dart` - Hue/saturation color wheel
-- `temperature_slider.dart` - Color temperature slider
+- `brightness_slider.dart` - Brightness control with percentage and debouncing
+- `color_picker.dart` - Hue/saturation color wheel with debouncing
+- `temperature_slider.dart` - Color temperature slider with debouncing
 - `effect_button.dart` - Effect action button (Pulse, Breathe, etc.)
 - `device_status_indicator.dart` - Connection/reachability indicator
 
+**Debouncing & Smoothing Strategy**:
+
+The slider widgets must provide smooth visual feedback while preventing API spam. This is achieved through a two-layer update system:
+
+1. **Immediate Local Update** (0ms delay):
+   - User drags slider → UI updates instantly
+   - Calls `updateBrightnessLocally()` (no API call)
+   - Provides smooth, responsive feeling
+
+2. **Debounced API Call** (500ms delay):
+   - Timer resets on each slider change
+   - Only when user stops dragging for 500ms → API call fires
+   - Calls `setBrightness()` which syncs with backend
+
+**Example: `brightness_slider.dart`**:
+```dart
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class BrightnessSlider extends ConsumerStatefulWidget {
+  final Device device;
+  final String accountId;
+
+  const BrightnessSlider({
+    required this.device,
+    required this.accountId,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  ConsumerState<BrightnessSlider> createState() => _BrightnessSliderState();
+}
+
+class _BrightnessSliderState extends ConsumerState<BrightnessSlider> {
+  Timer? _debounceTimer;
+  static const _debounceDuration = Duration(milliseconds: 500);
+
+  void _onBrightnessChanged(double value) {
+    // 1. Immediate local update for smooth UI
+    ref.read(devicesProvider.notifier).updateBrightnessLocally(
+      widget.device.id,
+      value,
+    );
+
+    // 2. Cancel previous timer
+    _debounceTimer?.cancel();
+
+    // 3. Set new timer for API call
+    _debounceTimer = Timer(_debounceDuration, () {
+      ref.read(devicesProvider.notifier).setBrightness(
+        widget.accountId,
+        widget.device.id,
+        value,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = widget.device.brightness;
+
+    return Column(
+      children: [
+        Text('${(brightness * 100).round()}%'),
+        Slider(
+          value: brightness,
+          min: 0.0,
+          max: 1.0,
+          onChanged: _onBrightnessChanged,
+          // Optional: Add visual smoothness
+          divisions: 100,
+        ),
+      ],
+    );
+  }
+}
+```
+
+**Same Pattern for Color Picker**:
+- User drags on color wheel → instant UI update via `updateColorLocally()`
+- 500ms after user stops → API call via `setColor()`
+
 **Tasks**:
 - [ ] Create all control widgets
-- [ ] Add smooth animations
-- [ ] Add haptic feedback
-- [ ] Add debouncing for sliders (don't spam API)
-- [ ] Add visual feedback for pending actions
+- [ ] Implement debouncing with 500ms delay for sliders/pickers
+- [ ] Add smooth animations for transitions
+- [ ] Add haptic feedback on value changes
+- [ ] Add visual feedback for pending API calls (subtle spinner/indicator)
 - [ ] Style with glassmorphism theme
+- [ ] Test that rapid slider movements only trigger one API call
 
 ---
 
@@ -1120,14 +1308,17 @@ Phase 4 is complete when:
 
 ---
 
-## Questions to Resolve
+## Implementation Decisions
 
-- [ ] Caching TTL: 60 seconds reasonable? Or make it configurable?
-- [ ] Rate limiting: What limits per account? (LIFX: 120 req/min)
-- [ ] Selector pattern: Support group/location selectors or just device IDs?
-- [ ] Effects: Include in Phase 4 or defer to Phase 7?
-- [ ] Concurrent control: Last-write-wins or queue actions?
-- [ ] Device icons: Use generic icons or provider-specific?
+The following design decisions have been finalized:
+
+- ✅ **Caching TTL**: Configurable via environment variable (`DEVICE_CACHE_TTL_SECONDS`), default 60 seconds
+- ✅ **Rate limiting**: 30 requests per minute per account (conservative, LIFX supports 120 req/min)
+- ✅ **Slider debouncing**: 500ms debounce with immediate local UI updates for smooth UX
+- ✅ **Selector pattern**: Support group/location selectors (e.g., `group_id:xxx`, `location_id:xxx`) but **lower priority** - focus on individual device control first
+- ✅ **Effects**: Include Pulse and Breathe effects in Phase 4 (LIFX API makes this straightforward)
+- ✅ **Concurrent control**: Last-write-wins strategy (simple, works well for home lighting scenarios)
+- ✅ **Device icons**: Use generic light bulb icons (provider-specific icons not a priority)
 
 ---
 
