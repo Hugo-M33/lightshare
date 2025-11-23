@@ -143,7 +143,8 @@ func (s *AuthService) Login(ctx context.Context, req LoginRequest, userAgent, ip
 	}
 
 	// Compare password
-	if err := crypto.ComparePassword(req.Password, user.PasswordHash); err != nil {
+	err = crypto.ComparePassword(req.Password, user.PasswordHash)
+	if err != nil {
 		return nil, ErrInvalidCredentials
 	}
 
@@ -186,7 +187,8 @@ func (s *AuthService) VerifyEmail(ctx context.Context, token string, userAgent, 
 	}
 
 	// Verify email (mark as verified and clear token)
-	if err := s.userRepo.VerifyEmail(ctx, token); err != nil {
+	err = s.userRepo.VerifyEmail(ctx, token)
+	if err != nil {
 		return nil, fmt.Errorf("failed to verify email: %w", err)
 	}
 
@@ -262,7 +264,8 @@ func (s *AuthService) LoginWithMagicLink(ctx context.Context, token string, user
 	}
 
 	// Clear magic link token
-	if err := s.userRepo.ClearMagicLinkToken(ctx, user.ID); err != nil {
+	err = s.userRepo.ClearMagicLinkToken(ctx, user.ID)
+	if err != nil {
 		return nil, fmt.Errorf("failed to clear magic link token: %w", err)
 	}
 
@@ -322,7 +325,8 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string, use
 	}
 
 	// Revoke old refresh token
-	if err := s.refreshTokenRepo.Revoke(ctx, refreshTokenHash); err != nil {
+	err = s.refreshTokenRepo.Revoke(ctx, refreshTokenHash)
+	if err != nil {
 		return nil, fmt.Errorf("failed to revoke old refresh token: %w", err)
 	}
 
