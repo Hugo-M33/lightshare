@@ -19,7 +19,11 @@ func TestHealth(t *testing.T) {
 		t.Fatalf("Failed to test request: %v", err)
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("Failed to close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode != 200 {
 		t.Errorf("Expected status 200, got %d", resp.StatusCode)
@@ -49,7 +53,11 @@ func TestReady(t *testing.T) {
 		t.Fatalf("Failed to test request: %v", err)
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("Failed to close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode != 200 {
 		t.Errorf("Expected status 200, got %d", resp.StatusCode)
