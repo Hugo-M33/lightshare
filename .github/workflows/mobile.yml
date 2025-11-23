@@ -27,7 +27,7 @@ jobs:
           path: |
             ~/.pub-cache
             mobile/.dart_tool
-          key: ${{ runner.os }}-flutter-${{ hashFiles('mobile/pubspec.lock') }}
+          key: ${{ runner.os }}-flutter-${{ hashFiles('mobile/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-flutter-
 
@@ -78,7 +78,7 @@ jobs:
           path: |
             ~/.pub-cache
             mobile/.dart_tool
-          key: ${{ runner.os }}-flutter-${{ hashFiles('mobile/pubspec.lock') }}
+          key: ${{ runner.os }}-flutter-${{ hashFiles('mobile/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-flutter-
 
@@ -112,7 +112,7 @@ jobs:
           path: |
             ~/.pub-cache
             mobile/.dart_tool
-          key: ${{ runner.os }}-flutter-${{ hashFiles('mobile/pubspec.lock') }}
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-flutter-
 
