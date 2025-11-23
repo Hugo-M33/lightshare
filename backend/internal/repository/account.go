@@ -12,6 +12,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/lightshare/backend/internal/models"
+	"github.com/lightshare/backend/pkg/crypto"
 )
 
 var (
@@ -31,12 +32,16 @@ type AccountRepositoryInterface interface {
 
 // AccountRepository handles account database operations
 type AccountRepository struct {
-	db *sqlx.DB
+	db            *sqlx.DB
+	encryptionKey []byte
 }
 
 // NewAccountRepository creates a new account repository
-func NewAccountRepository(db *sqlx.DB) *AccountRepository {
-	return &AccountRepository{db: db}
+func NewAccountRepository(db *sqlx.DB, encryptionKey []byte) *AccountRepository {
+	return &AccountRepository{
+		db:            db,
+		encryptionKey: encryptionKey,
+	}
 }
 
 // Create creates a new account
@@ -149,4 +154,29 @@ func (r *AccountRepository) Delete(ctx context.Context, accountID, userID uuid.U
 	}
 
 	return nil
+}
+
+// FindByIDString retrieves an account by string ID (convenience method for Phase 4)
+func (r *AccountRepository) FindByIDString(ctx context.Context, accountID string) (*models.Account, error) {
+	id, err := uuid.Parse(accountID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid account ID: %w", err)
+	}
+	return r.FindByID(ctx, id)
+}
+
+// GetDecryptedToken retrieves and decrypts the token for an account
+func (r *AccountRepository) GetDecryptedToken(ctx context.Context, accountID string) (string, error) {
+	account, err := r.FindByIDString(ctx, accountID)
+	if err != nil {
+		return "", err
+	}
+
+	// Decrypt the token
+	token, err := crypto.DecryptToken(account.EncryptedToken, r.encryptionKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to decrypt token: %w", err)
+	}
+
+	return token, nil
 }

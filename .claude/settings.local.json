@@ -7,7 +7,10 @@
       "Bash(go build:*)",
       "Bash(go test:*)",
       "Bash(/Users/hugomartin/go/bin/goimports:*)",
-      "Bash(flutter test)"
+      "Bash(flutter test)",
+      "Bash(golangci-lint run:*)",
+      "Bash(/Users/hugomartin/go/bin/fieldalignment:*)",
+      "Bash(flutter analyze:*)"
     ],
     "deny": [],
     "ask": []

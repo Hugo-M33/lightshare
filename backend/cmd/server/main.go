@@ -85,10 +85,18 @@ func main() {
 	// Initialize services
 	logger.Info("Initializing services...")
 
+	// Load encryption key for provider tokens
+	encryptionKey, err := crypto.LoadEncryptionKey()
+	if err != nil {
+		logger.Error("Failed to load encryption key", "error", err)
+		logger.Info("To generate a new encryption key, run: openssl rand -hex 32")
+		os.Exit(1)
+	}
+
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db.DB)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db.DB)
-	accountRepo := repository.NewAccountRepository(db.DB)
+	accountRepo := repository.NewAccountRepository(db.DB, encryptionKey)
 
 	// Initialize JWT service
 	jwtService := jwt.New(jwt.Config{
@@ -109,19 +117,19 @@ func main() {
 		MobileDeepLinkScheme: cfg.Email.MobileDeepLinkScheme,
 	})
 
-	// Load encryption key for provider tokens
-	encryptionKey, err := crypto.LoadEncryptionKey()
-	if err != nil {
-		logger.Error("Failed to load encryption key", "error", err)
-		logger.Info("To generate a new encryption key, run: openssl rand -hex 32")
-		os.Exit(1)
-	}
-
 	// Initialize auth service
 	authService := services.NewAuthService(userRepo, refreshTokenRepo, jwtService, emailService)
 
 	// Initialize provider service
 	providerService := services.NewProviderService(accountRepo, encryptionKey)
+
+	// Initialize device service
+	deviceService := services.NewDeviceService(
+		accountRepo,
+		redisClient.Client,
+		cfg.Devices.CacheTTL,
+		cfg.Devices.RateLimitPerMin,
+	)
 
 	logger.Info("Services initialized successfully")
 
@@ -138,7 +146,7 @@ func main() {
 	middleware.Setup(app)
 
 	// Setup routes
-	setupRoutes(app, authService, providerService, jwtService)
+	setupRoutes(app, authService, providerService, deviceService, jwtService)
 
 	// Start server in goroutine
 	go func() {
@@ -168,7 +176,7 @@ func main() {
 	logger.Info("Server stopped")
 }
 
-func setupRoutes(app *fiber.App, authService *services.AuthService, providerService *services.ProviderService, jwtService *jwt.Service) {
+func setupRoutes(app *fiber.App, authService *services.AuthService, providerService *services.ProviderService, deviceService *services.DeviceService, jwtService *jwt.Service) {
 	// Health check endpoints
 	app.Get("/health", handlers.Health(version))
 	app.Get("/ready", handlers.Ready())
@@ -179,6 +187,7 @@ func setupRoutes(app *fiber.App, authService *services.AuthService, providerServ
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	providerHandler := handlers.NewProviderHandler(providerService)
+	deviceHandler := handlers.NewDeviceHandler(deviceService)
 
 	// Auth routes
 	auth := v1.Group("/auth")
@@ -203,6 +212,16 @@ func setupRoutes(app *fiber.App, authService *services.AuthService, providerServ
 	accounts := v1.Group("/accounts", authMiddleware)
 	accounts.Get("", providerHandler.ListAccounts)
 	accounts.Delete("/:id", providerHandler.DisconnectAccount)
+
+	// Device routes (protected) - Phase 4
+	// List all devices across all accounts
+	v1.Get("/devices", authMiddleware, deviceHandler.ListDevices)
+
+	// Account-specific device routes
+	v1.Get("/accounts/:accountId/devices", authMiddleware, deviceHandler.ListAccountDevices)
+	v1.Get("/accounts/:accountId/devices/:deviceId", authMiddleware, deviceHandler.GetDevice)
+	v1.Post("/accounts/:accountId/devices/:selector/action", authMiddleware, deviceHandler.ExecuteAction)
+	v1.Post("/accounts/:accountId/devices/refresh", authMiddleware, deviceHandler.RefreshDevices)
 }
 
 func errorHandler(c *fiber.Ctx, err error) error {

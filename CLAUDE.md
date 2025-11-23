@@ -189,3 +189,5 @@ docker-compose logs -f backend
 - [Philips Hue API](https://developers.meethue.com/)
 - [Apple Receipt Validation](https://developer.apple.com/documentation/storekit/in-app_purchase/validating_receipts_with_the_app_store)
 - [Google Play Billing](https://developer.android.com/google/play/billing)
+- Always run gofmt, goimports, golint-cli, alignment after modifying the go project before considering the task finished. Some tools are in /Users/hmartin/go/bin/
+- Always run flutter analyze and test before considering the task finished after modifying the flutter project

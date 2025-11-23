@@ -10,6 +10,8 @@ import '../../features/home/screens/home_screen.dart';
 import '../../features/providers/screens/accounts_screen.dart';
 import '../../features/providers/screens/provider_selection_screen.dart';
 import '../../features/providers/screens/token_entry_screen.dart';
+import '../../features/devices/screens/devices_screen.dart';
+import '../../features/devices/screens/device_detail_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -79,6 +81,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final provider = state.extra as models.Provider;
           return TokenEntryScreen(provider: provider);
+        },
+      ),
+      GoRoute(
+        path: '/devices',
+        builder: (context, state) => const DevicesScreen(),
+      ),
+      GoRoute(
+        path: '/devices/:deviceId',
+        builder: (context, state) {
+          final deviceId = state.pathParameters['deviceId']!;
+          return DeviceDetailScreen(deviceId: deviceId);
         },
       ),
     ],

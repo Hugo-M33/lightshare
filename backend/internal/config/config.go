@@ -14,6 +14,7 @@ type Config struct {
 	Server   ServerConfig
 	JWT      JWTConfig
 	Database DatabaseConfig
+	Devices  DevicesConfig
 }
 
 // ServerConfig holds server-related configuration
@@ -57,6 +58,12 @@ type EmailConfig struct {
 	MobileDeepLinkScheme string
 }
 
+// DevicesConfig holds device control-related configuration
+type DevicesConfig struct {
+	CacheTTL        time.Duration // How long to cache device lists
+	RateLimitPerMin int           // Maximum API requests per account per minute
+}
+
 // Load loads configuration from environment variables
 func Load() *Config {
 	return &Config{
@@ -90,6 +97,10 @@ func Load() *Config {
 			FromName:             getEnv("EMAIL_FROM_NAME", "LightShare"),
 			BaseURL:              getEnv("APP_BASE_URL", "http://localhost:8080"),
 			MobileDeepLinkScheme: getEnv("MOBILE_DEEP_LINK_SCHEME", "lightshare"),
+		},
+		Devices: DevicesConfig{
+			CacheTTL:        getDurationEnv("DEVICE_CACHE_TTL", 60*time.Second),
+			RateLimitPerMin: getIntEnv("RATE_LIMIT_PER_MIN", 30),
 		},
 	}
 }
