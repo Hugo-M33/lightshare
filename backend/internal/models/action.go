@@ -6,8 +6,8 @@ import (
 
 // ActionRequest represents a control action request from the client
 type ActionRequest struct {
-	Action     string                 `json:"action" validate:"required"`     // Action type
-	Parameters map[string]interface{} `json:"parameters" validate:"required"` // Action parameters
+	Parameters map[string]interface{} `json:"parameters" validate:"required"`
+	Action     string                 `json:"action" validate:"required"`
 }
 
 // Supported action types

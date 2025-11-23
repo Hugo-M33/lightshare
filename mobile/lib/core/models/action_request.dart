@@ -32,7 +32,7 @@ class ActionRequest {
     return ActionRequest(
       action: 'power',
       parameters: {
-        'state': state,
+        'state': state ? 'on' : 'off',
         'duration': duration,
       },
     );
@@ -65,7 +65,7 @@ class ActionRequest {
       'duration': duration,
     };
     if (kelvin != null) {
-      params['kelvin'] = kelvin;
+      params['kelvin'] = kelvin.toDouble();
     }
     return ActionRequest(
       action: 'color',
@@ -81,7 +81,7 @@ class ActionRequest {
     return ActionRequest(
       action: 'temperature',
       parameters: {
-        'kelvin': kelvin,
+        'kelvin': kelvin.toDouble(),
         'duration': duration,
       },
     );

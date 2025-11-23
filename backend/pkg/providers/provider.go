@@ -43,17 +43,17 @@ type AccountInfo struct {
 
 // Device represents a smart light device (unified across providers)
 type Device struct {
-	ID           string
-	Label        string
-	Power        string  // "on" or "off"
-	Brightness   float64 // 0.0-1.0
 	Color        *DeviceColor
-	Connected    bool
-	Reachable    bool
 	Group        *DeviceGroup
 	Location     *DeviceLocation
-	Capabilities []string
 	Metadata     map[string]interface{}
+	ID           string
+	Label        string
+	Power        string
+	Capabilities []string
+	Brightness   float64
+	Connected    bool
+	Reachable    bool
 }
 
 // DeviceColor represents color information for a device

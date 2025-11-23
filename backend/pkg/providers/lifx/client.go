@@ -51,15 +51,15 @@ type LightsResponse []struct {
 		ID   string `json:"id"`
 		Name string `json:"name"`
 	} `json:"location"`
+	ID    string `json:"id"`
+	UUID  string `json:"uuid"`
+	Label string `json:"label"`
+	Power string `json:"power"`
 	Color struct {
 		Hue        float64 `json:"hue"`
 		Saturation float64 `json:"saturation"`
 		Kelvin     int     `json:"kelvin"`
 	} `json:"color"`
-	ID         string  `json:"id"`
-	UUID       string  `json:"uuid"`
-	Label      string  `json:"label"`
-	Power      string  `json:"power"`
 	Brightness float64 `json:"brightness"`
 	Connected  bool    `json:"connected"`
 }
@@ -129,17 +129,17 @@ func (c *Client) GetAccountInfo(token string) (*AccountInfo, error) {
 
 // Device represents a LIFX light device
 type Device struct {
-	ID           string
-	Label        string
-	Power        string  // "on" or "off"
-	Brightness   float64 // 0.0-1.0
 	Color        *DeviceColor
-	Connected    bool
-	Reachable    bool
 	Group        *DeviceGroup
 	Location     *DeviceLocation
-	Capabilities []string
 	Metadata     map[string]interface{}
+	ID           string
+	Label        string
+	Power        string
+	Capabilities []string
+	Brightness   float64
+	Connected    bool
+	Reachable    bool
 }
 
 // DeviceColor represents color information

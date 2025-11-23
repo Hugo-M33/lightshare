@@ -198,7 +198,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                           children: [
                             Text(
                               device.providerDisplayName,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: AppTheme.textSecondary,
                               ),
@@ -207,7 +207,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 '• ${device.group!.name}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: AppTheme.textSecondary,
                                 ),

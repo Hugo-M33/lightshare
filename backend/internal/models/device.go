@@ -2,19 +2,19 @@ package models
 
 // Device represents a smart light device from any provider (LIFX, Hue, etc.)
 type Device struct {
-	ID           string                 `json:"id"`                 // Provider-specific device ID
-	AccountID    string                 `json:"account_id"`         // Our account UUID
-	Provider     string                 `json:"provider"`           // "lifx" or "hue"
-	Label        string                 `json:"label"`              // User-friendly name
-	Power        string                 `json:"power"`              // "on" or "off"
-	Brightness   float64                `json:"brightness"`         // 0.0 - 1.0
-	Color        *DeviceColor           `json:"color,omitempty"`    // Color information (if supported)
-	Connected    bool                   `json:"connected"`          // Whether device is connected to network
-	Reachable    bool                   `json:"reachable"`          // Whether device is reachable by cloud API
-	Group        *DeviceGroup           `json:"group,omitempty"`    // Group/room information
-	Location     *DeviceLocation        `json:"location,omitempty"` // Location/home information
-	Capabilities []string               `json:"capabilities"`       // ["color", "temperature", "effects"]
-	Metadata     map[string]interface{} `json:"metadata,omitempty"` // Provider-specific metadata
+	Group        *DeviceGroup           `json:"group,omitempty"`
+	Color        *DeviceColor           `json:"color,omitempty"`
+	Location     *DeviceLocation        `json:"location,omitempty"`
+	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+	AccountID    string                 `json:"account_id"`
+	Provider     string                 `json:"provider"`
+	Label        string                 `json:"label"`
+	Power        string                 `json:"power"`
+	ID           string                 `json:"id"`
+	Capabilities []string               `json:"capabilities"`
+	Brightness   float64                `json:"brightness"`
+	Connected    bool                   `json:"connected"`
+	Reachable    bool                   `json:"reachable"`
 }
 
 // DeviceColor represents the color state of a device

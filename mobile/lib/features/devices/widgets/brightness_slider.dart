@@ -82,15 +82,15 @@ class BrightnessSlider extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(
+              Icon(
                 Icons.brightness_low,
                 color: AppTheme.textSecondary,
                 size: 16,
               ),
-              const Icon(
+              Icon(
                 Icons.brightness_high,
                 color: AppTheme.textSecondary,
                 size: 16,

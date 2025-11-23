@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/device.dart';
@@ -40,17 +39,17 @@ class ColorPickerWidget extends ConsumerWidget {
           const SizedBox(height: 20),
 
           // Hue slider
-          _buildHueSlider(ref),
+          _buildHueSlider(context, ref),
           const SizedBox(height: 20),
 
           // Saturation slider
-          _buildSaturationSlider(ref),
+          _buildSaturationSlider(context, ref),
         ],
       ),
     );
   }
 
-  Widget _buildHueSlider(WidgetRef ref) {
+  Widget _buildHueSlider(BuildContext context, WidgetRef ref) {
     final hue = device.color?.hue ?? 0.0;
 
     return Column(
@@ -87,7 +86,7 @@ class ColorPickerWidget extends ConsumerWidget {
                 Colors.green,
                 Colors.cyan,
                 Colors.blue,
-                Colors.magenta,
+                Color(0xFFFF00FF), // Magenta
                 Colors.red,
               ],
             ),
@@ -129,7 +128,7 @@ class ColorPickerWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildSaturationSlider(WidgetRef ref) {
+  Widget _buildSaturationSlider(BuildContext context, WidgetRef ref) {
     final saturation = device.color?.saturation ?? 1.0;
     final hue = device.color?.hue ?? 0.0;
 

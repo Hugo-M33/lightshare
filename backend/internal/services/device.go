@@ -63,7 +63,7 @@ func (s *DeviceService) ListDevices(ctx context.Context, userID string) ([]*mode
 		}
 
 		// Cache miss - fetch from provider
-		devices, err = s.fetchDevicesFromProvider(ctx, &account)
+		devices, err = s.fetchDevicesFromProvider(ctx, account)
 		if err != nil {
 			// Log error but continue with other accounts
 			continue

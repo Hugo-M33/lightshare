@@ -85,10 +85,18 @@ func main() {
 	// Initialize services
 	logger.Info("Initializing services...")
 
+	// Load encryption key for provider tokens
+	encryptionKey, err := crypto.LoadEncryptionKey()
+	if err != nil {
+		logger.Error("Failed to load encryption key", "error", err)
+		logger.Info("To generate a new encryption key, run: openssl rand -hex 32")
+		os.Exit(1)
+	}
+
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db.DB)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db.DB)
-	accountRepo := repository.NewAccountRepository(db.DB)
+	accountRepo := repository.NewAccountRepository(db.DB, encryptionKey)
 
 	// Initialize JWT service
 	jwtService := jwt.New(jwt.Config{
@@ -109,14 +117,6 @@ func main() {
 		MobileDeepLinkScheme: cfg.Email.MobileDeepLinkScheme,
 	})
 
-	// Load encryption key for provider tokens
-	encryptionKey, err := crypto.LoadEncryptionKey()
-	if err != nil {
-		logger.Error("Failed to load encryption key", "error", err)
-		logger.Info("To generate a new encryption key, run: openssl rand -hex 32")
-		os.Exit(1)
-	}
-
 	// Initialize auth service
 	authService := services.NewAuthService(userRepo, refreshTokenRepo, jwtService, emailService)
 
@@ -126,7 +126,7 @@ func main() {
 	// Initialize device service
 	deviceService := services.NewDeviceService(
 		accountRepo,
-		redisClient,
+		redisClient.Client,
 		cfg.Devices.CacheTTL,
 		cfg.Devices.RateLimitPerMin,
 	)

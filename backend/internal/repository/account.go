@@ -32,12 +32,16 @@ type AccountRepositoryInterface interface {
 
 // AccountRepository handles account database operations
 type AccountRepository struct {
-	db *sqlx.DB
+	db            *sqlx.DB
+	encryptionKey []byte
 }
 
 // NewAccountRepository creates a new account repository
-func NewAccountRepository(db *sqlx.DB) *AccountRepository {
-	return &AccountRepository{db: db}
+func NewAccountRepository(db *sqlx.DB, encryptionKey []byte) *AccountRepository {
+	return &AccountRepository{
+		db:            db,
+		encryptionKey: encryptionKey,
+	}
 }
 
 // Create creates a new account
@@ -169,7 +173,7 @@ func (r *AccountRepository) GetDecryptedToken(ctx context.Context, accountID str
 	}
 
 	// Decrypt the token
-	token, err := crypto.DecryptToken(account.EncryptedToken)
+	token, err := crypto.DecryptToken(account.EncryptedToken, r.encryptionKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to decrypt token: %w", err)
 	}
