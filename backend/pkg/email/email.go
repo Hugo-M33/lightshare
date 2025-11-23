@@ -2,8 +2,10 @@ package email
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"html/template"
+	"net"
 	"net/smtp"
 	"strings"
 )
@@ -22,19 +24,12 @@ type Config struct {
 // Service handles email sending
 type Service struct {
 	config Config
-	auth   smtp.Auth
 }
 
 // New creates a new email service
 func New(cfg Config) *Service {
-	var auth smtp.Auth
-	if cfg.SMTPUsername != "" && cfg.SMTPPassword != "" {
-		auth = smtp.PlainAuth("", cfg.SMTPUsername, cfg.SMTPPassword, cfg.SMTPHost)
-	}
-
 	return &Service{
 		config: cfg,
-		auth:   auth,
 	}
 }
 
@@ -46,9 +41,10 @@ type EmailMessage struct {
 	IsHTML  bool
 }
 
-// Send sends an email
+// Send sends an email with TLS support
 func (s *Service) Send(msg EmailMessage) error {
 	from := fmt.Sprintf("%s <%s>", s.config.FromName, s.config.FromEmail)
+	addr := fmt.Sprintf("%s:%s", s.config.SMTPHost, s.config.SMTPPort)
 
 	// Build email headers
 	headers := make(map[string]string)
@@ -67,14 +63,66 @@ func (s *Service) Send(msg EmailMessage) error {
 	}
 	message += "\r\n" + msg.Body
 
-	// Send email
-	addr := fmt.Sprintf("%s:%s", s.config.SMTPHost, s.config.SMTPPort)
-	err := smtp.SendMail(addr, s.auth, s.config.FromEmail, []string{msg.To}, []byte(message))
+	// Connect to SMTP server
+	conn, err := net.Dial("tcp", addr)
 	if err != nil {
-		return fmt.Errorf("failed to send email: %w", err)
+		return fmt.Errorf("failed to connect to SMTP server: %w", err)
+	}
+	defer conn.Close()
+
+	// Create SMTP client
+	client, err := smtp.NewClient(conn, s.config.SMTPHost)
+	if err != nil {
+		return fmt.Errorf("failed to create SMTP client: %w", err)
+	}
+	defer client.Close()
+
+	// Start TLS if using port 587 (STARTTLS)
+	if s.config.SMTPPort == "587" {
+		tlsConfig := &tls.Config{
+			ServerName: s.config.SMTPHost,
+		}
+		if err = client.StartTLS(tlsConfig); err != nil {
+			return fmt.Errorf("failed to start TLS: %w", err)
+		}
 	}
 
-	return nil
+	// Authenticate if credentials provided
+	if s.config.SMTPUsername != "" && s.config.SMTPPassword != "" {
+		auth := smtp.PlainAuth("", s.config.SMTPUsername, s.config.SMTPPassword, s.config.SMTPHost)
+		if err = client.Auth(auth); err != nil {
+			return fmt.Errorf("failed to authenticate: %w", err)
+		}
+	}
+
+	// Set sender
+	if err = client.Mail(s.config.FromEmail); err != nil {
+		return fmt.Errorf("failed to set sender: %w", err)
+	}
+
+	// Set recipient
+	if err = client.Rcpt(msg.To); err != nil {
+		return fmt.Errorf("failed to set recipient: %w", err)
+	}
+
+	// Send message body
+	writer, err := client.Data()
+	if err != nil {
+		return fmt.Errorf("failed to get data writer: %w", err)
+	}
+
+	_, err = writer.Write([]byte(message))
+	if err != nil {
+		return fmt.Errorf("failed to write message: %w", err)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return fmt.Errorf("failed to close writer: %w", err)
+	}
+
+	// Send QUIT
+	return client.Quit()
 }
 
 // SendVerificationEmail sends an email verification email
