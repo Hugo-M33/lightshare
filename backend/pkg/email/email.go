@@ -12,13 +12,14 @@ import (
 
 // Config holds email service configuration
 type Config struct {
-	SMTPHost     string
-	SMTPPort     string
-	SMTPUsername string
-	SMTPPassword string
-	FromEmail    string
-	FromName     string
-	BaseURL      string // Base URL for email links (e.g., https://app.lightshare.com)
+	SMTPHost            string
+	SMTPPort            string
+	SMTPUsername        string
+	SMTPPassword        string
+	FromEmail           string
+	FromName            string
+	BaseURL             string // Base URL for email links (e.g., https://app.lightshare.com)
+	MobileDeepLinkScheme string // Custom URL scheme for mobile deep links (e.g., lightshare)
 }
 
 // Service handles email sending
@@ -78,7 +79,7 @@ func (s *Service) Send(msg EmailMessage) error {
 
 // SendVerificationEmail sends an email verification email
 func (s *Service) SendVerificationEmail(to, token string) error {
-	verificationURL := fmt.Sprintf("%s/verify-email?token=%s", s.config.BaseURL, token)
+	verificationURL := fmt.Sprintf("%s://verify-email?token=%s", s.config.MobileDeepLinkScheme, token)
 
 	tmpl := `
 <!DOCTYPE html>
@@ -128,7 +129,7 @@ func (s *Service) SendVerificationEmail(to, token string) error {
 
 // SendMagicLinkEmail sends a magic link login email
 func (s *Service) SendMagicLinkEmail(to, token string) error {
-	magicLinkURL := fmt.Sprintf("%s/magic-link?token=%s", s.config.BaseURL, token)
+	magicLinkURL := fmt.Sprintf("%s://magic-link?token=%s", s.config.MobileDeepLinkScheme, token)
 
 	tmpl := `
 <!DOCTYPE html>

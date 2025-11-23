@@ -125,17 +125,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     try {
       final authService = _ref.read(authServiceProvider);
-      await authService.verifyEmail(token);
+      final response = await authService.verifyEmail(token);
 
-      // Update user email verified status
-      if (state.user != null) {
-        state = state.copyWith(
-          user: state.user!.copyWith(emailVerified: true),
-          isLoading: false,
-        );
-      } else {
-        state = state.copyWith(isLoading: false);
-      }
+      // User is now logged in after email verification
+      state = AuthState(
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false,
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

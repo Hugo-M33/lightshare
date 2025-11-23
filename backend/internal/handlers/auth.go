@@ -126,8 +126,12 @@ func (h *AuthHandler) VerifyEmail(c *fiber.Ctx) error {
 		})
 	}
 
+	// Get user agent and IP address
+	userAgent := c.Get("User-Agent")
+	ipAddress := c.IP()
+
 	// Call auth service
-	err := h.authService.VerifyEmail(c.Context(), req.Token)
+	resp, err := h.authService.VerifyEmail(c.Context(), req.Token, &userAgent, &ipAddress)
 	if err != nil {
 		if errors.Is(err, repository.ErrTokenExpired) {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -140,9 +144,7 @@ func (h *AuthHandler) VerifyEmail(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "email verified successfully",
-	})
+	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
 // MagicLinkRequest represents the magic link request body

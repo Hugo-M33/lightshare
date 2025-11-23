@@ -29,36 +29,43 @@ class _EmailVerificationScreenState
   void initState() {
     super.initState();
     if (widget.token != null) {
-      _verifyEmail();
+      // Delay verification until after widget tree is built
+      Future.microtask(() => _verifyEmail());
     }
   }
 
   Future<void> _verifyEmail() async {
     if (widget.token == null) return;
 
-    setState(() {
-      _isVerifying = true;
-      _errorMessage = null;
-    });
+    if (mounted) {
+      setState(() {
+        _isVerifying = true;
+        _errorMessage = null;
+      });
+    }
 
     try {
       await ref.read(authProvider.notifier).verifyEmail(widget.token!);
 
-      setState(() {
-        _isVerifying = false;
-        _isVerified = true;
-      });
-
-      // Auto-navigate to login after 2 seconds
-      await Future.delayed(const Duration(seconds: 2));
       if (mounted) {
-        context.go('/auth/login');
+        setState(() {
+          _isVerifying = false;
+          _isVerified = true;
+        });
+      }
+
+      // Auto-navigate to home after 1.5 seconds (user is now logged in)
+      await Future.delayed(const Duration(milliseconds: 1500));
+      if (mounted) {
+        context.go('/');
       }
     } catch (e) {
-      setState(() {
-        _isVerifying = false;
-        _errorMessage = e.toString();
-      });
+      if (mounted) {
+        setState(() {
+          _isVerifying = false;
+          _errorMessage = e.toString();
+        });
+      }
     }
   }
 
@@ -179,7 +186,7 @@ class _EmailVerificationScreenState
     return Column(
       children: [
         Text(
-          'Email Verified!',
+          'Welcome to LightShare!',
           style: Theme.of(context).textTheme.displaySmall?.copyWith(
                 color: Colors.green,
               ),
@@ -187,7 +194,7 @@ class _EmailVerificationScreenState
         ),
         const SizedBox(height: 12),
         Text(
-          'Your email has been successfully verified. Redirecting to login...',
+          'Your email has been verified and you\'re now logged in. Taking you to your dashboard...',
           style: Theme.of(context).textTheme.bodyMedium,
           textAlign: TextAlign.center,
         ),

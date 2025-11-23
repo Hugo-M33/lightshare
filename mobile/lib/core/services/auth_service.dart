@@ -58,12 +58,20 @@ class AuthService {
     }
   }
 
-  Future<void> verifyEmail(String token) async {
+  Future<AuthResponse> verifyEmail(String token) async {
     try {
-      await _apiClient.post(
+      final response = await _apiClient.post(
         '/api/v1/auth/verify-email',
         data: {'token': token},
       );
+
+      final authResponse =
+          AuthResponse.fromJson(response.data as Map<String, dynamic>);
+
+      // Store tokens
+      await _storeTokens(authResponse);
+
+      return authResponse;
     } on DioException catch (e) {
       throw _handleError(e);
     }

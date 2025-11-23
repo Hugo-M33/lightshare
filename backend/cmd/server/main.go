@@ -81,13 +81,14 @@ func main() {
 
 	// Initialize email service
 	emailService := email.New(email.Config{
-		SMTPHost:     cfg.Email.SMTPHost,
-		SMTPPort:     cfg.Email.SMTPPort,
-		SMTPUsername: cfg.Email.SMTPUsername,
-		SMTPPassword: cfg.Email.SMTPPassword,
-		FromEmail:    cfg.Email.FromEmail,
-		FromName:     cfg.Email.FromName,
-		BaseURL:      cfg.Email.BaseURL,
+		SMTPHost:            cfg.Email.SMTPHost,
+		SMTPPort:            cfg.Email.SMTPPort,
+		SMTPUsername:        cfg.Email.SMTPUsername,
+		SMTPPassword:        cfg.Email.SMTPPassword,
+		FromEmail:           cfg.Email.FromEmail,
+		FromName:            cfg.Email.FromName,
+		BaseURL:             cfg.Email.BaseURL,
+		MobileDeepLinkScheme: cfg.Email.MobileDeepLinkScheme,
 	})
 
 	// Initialize auth service

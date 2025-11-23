@@ -170,9 +170,45 @@ func (s *AuthService) Login(ctx context.Context, req LoginRequest, userAgent, ip
 	}, nil
 }
 
-// VerifyEmail verifies a user's email with the verification token
-func (s *AuthService) VerifyEmail(ctx context.Context, token string) error {
-	return s.userRepo.VerifyEmail(ctx, token)
+// VerifyEmail verifies a user's email with the verification token and returns JWT tokens
+func (s *AuthService) VerifyEmail(ctx context.Context, token string, userAgent, ipAddress *string) (*LoginResponse, error) {
+	// Get user by verification token
+	user, err := s.userRepo.GetByEmailVerificationToken(ctx, token)
+	if err != nil {
+		if errors.Is(err, repository.ErrTokenExpired) {
+			return nil, repository.ErrTokenExpired
+		}
+		return nil, fmt.Errorf("failed to get user by verification token: %w", err)
+	}
+
+	// Verify email (mark as verified and clear token)
+	if err := s.userRepo.VerifyEmail(ctx, token); err != nil {
+		return nil, fmt.Errorf("failed to verify email: %w", err)
+	}
+
+	// Update user's email_verified status for the response
+	user.EmailVerified = true
+
+	// Generate token pair
+	tokenPair, err := s.jwtService.GenerateTokenPair(user.ID, user.Email, user.Role)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate tokens: %w", err)
+	}
+
+	// Store refresh token in database
+	refreshTokenHash := crypto.HashToken(tokenPair.RefreshToken)
+	_, err = s.refreshTokenRepo.Create(ctx, user.ID, refreshTokenHash, tokenPair.ExpiresAt.Add(29*24*time.Hour), userAgent, ipAddress)
+	if err != nil {
+		return nil, fmt.Errorf("failed to store refresh token: %w", err)
+	}
+
+	return &LoginResponse{
+		User:         user,
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
+		ExpiresAt:    tokenPair.ExpiresAt,
+		TokenType:    tokenPair.TokenType,
+	}, nil
 }
 
 // RequestMagicLink sends a magic link to the user's email

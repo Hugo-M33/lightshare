@@ -121,6 +121,30 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.
 	return &user, nil
 }
 
+// GetByEmailVerificationToken retrieves a user by email verification token
+func (r *UserRepository) GetByEmailVerificationToken(ctx context.Context, token string) (*models.User, error) {
+	var user models.User
+	query := `
+		SELECT id, email, password_hash, email_verified,
+			email_verification_token, email_verification_expires_at,
+			magic_link_token, magic_link_expires_at,
+			stripe_customer_id, role, created_at, updated_at
+		FROM users
+		WHERE email_verification_token = $1
+			AND email_verification_expires_at > $2
+	`
+
+	err := r.db.GetContext(ctx, &user, query, token, time.Now())
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrTokenExpired
+		}
+		return nil, fmt.Errorf("failed to get user by verification token: %w", err)
+	}
+
+	return &user, nil
+}
+
 // VerifyEmail verifies a user's email using the verification token
 func (r *UserRepository) VerifyEmail(ctx context.Context, token string) error {
 	query := `
