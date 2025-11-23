@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
 import '../services/provider_service.dart';
+import '../services/device_service.dart';
 
 // Secure storage provider
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -42,4 +43,11 @@ final providerServiceProvider = Provider<ProviderService>((ref) {
   final apiClient = ref.watch(apiClientProvider);
 
   return ProviderService(apiClient: apiClient);
+});
+
+// Device service provider
+final deviceServiceProvider = Provider<DeviceService>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+
+  return DeviceService(apiClient: apiClient);
 });
