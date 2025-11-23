@@ -33,15 +33,15 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 // Create creates a new user
 func (r *UserRepository) Create(ctx context.Context, params models.CreateUserParams) (*models.User, error) {
 	user := &models.User{
-		ID:                        uuid.New(),
-		Email:                     params.Email,
-		PasswordHash:              params.PasswordHash,
-		EmailVerified:             false,
-		EmailVerificationToken:    &params.EmailVerificationToken,
+		ID:                         uuid.New(),
+		Email:                      params.Email,
+		PasswordHash:               params.PasswordHash,
+		EmailVerified:              false,
+		EmailVerificationToken:     &params.EmailVerificationToken,
 		EmailVerificationExpiresAt: &params.EmailVerificationExpiresAt,
-		Role:                      "user",
-		CreatedAt:                 time.Now(),
-		UpdatedAt:                 time.Now(),
+		Role:                       "user",
+		CreatedAt:                  time.Now(),
+		UpdatedAt:                  time.Now(),
 	}
 
 	query := `

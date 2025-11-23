@@ -12,13 +12,13 @@ import (
 
 // Config holds email service configuration
 type Config struct {
-	SMTPHost            string
-	SMTPPort            string
-	SMTPUsername        string
-	SMTPPassword        string
-	FromEmail           string
-	FromName            string
-	BaseURL             string // Base URL for email links (e.g., https://app.lightshare.com)
+	SMTPHost             string
+	SMTPPort             string
+	SMTPUsername         string
+	SMTPPassword         string
+	FromEmail            string
+	FromName             string
+	BaseURL              string // Base URL for email links (e.g., https://app.lightshare.com)
 	MobileDeepLinkScheme string // Custom URL scheme for mobile deep links (e.g., lightshare)
 }
 

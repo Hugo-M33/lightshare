@@ -27,7 +27,7 @@ func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 // Returns true if an error occurred (and error response was sent), false otherwise.
 func parseRequestBody(c *fiber.Ctx, req interface{}) bool {
 	if err := c.BodyParser(req); err != nil {
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		_ = c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "invalid request body",
 		})
 		return true

@@ -226,7 +226,7 @@ class HomeScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.construction,
                 color: AppTheme.primaryPurple,
               ),

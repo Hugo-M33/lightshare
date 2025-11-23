@@ -84,9 +84,9 @@ func (s *AuthService) Signup(ctx context.Context, req SignupRequest) (*SignupRes
 
 	// Create user
 	user, err := s.userRepo.Create(ctx, models.CreateUserParams{
-		Email:                     req.Email,
-		PasswordHash:              passwordHash,
-		EmailVerificationToken:    verificationToken,
+		Email:                      req.Email,
+		PasswordHash:               passwordHash,
+		EmailVerificationToken:     verificationToken,
 		EmailVerificationExpiresAt: time.Now().Add(24 * time.Hour),
 	})
 	if err != nil {
@@ -117,11 +117,11 @@ type LoginRequest struct {
 
 // LoginResponse represents a login response
 type LoginResponse struct {
-	User         *models.User      `json:"user"`
-	AccessToken  string            `json:"access_token"`
-	RefreshToken string            `json:"refresh_token"`
-	ExpiresAt    time.Time         `json:"expires_at"`
-	TokenType    string            `json:"token_type"`
+	User         *models.User `json:"user"`
+	AccessToken  string       `json:"access_token"`
+	RefreshToken string       `json:"refresh_token"`
+	ExpiresAt    time.Time    `json:"expires_at"`
+	TokenType    string       `json:"token_type"`
 }
 
 // Login authenticates a user with email and password

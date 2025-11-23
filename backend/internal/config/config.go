@@ -8,11 +8,11 @@ import (
 
 // Config holds all configuration for the application
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	JWT      JWTConfig
-	Redis    RedisConfig
 	Email    EmailConfig
+	Redis    RedisConfig
+	Server   ServerConfig
+	JWT      JWTConfig
+	Database DatabaseConfig
 }
 
 // ServerConfig holds server-related configuration
@@ -26,10 +26,10 @@ type ServerConfig struct {
 // DatabaseConfig holds database-related configuration
 type DatabaseConfig struct {
 	URL             string
-	ConnMaxLifetime time.Duration
-	ConnMaxIdleTime time.Duration
 	MaxOpenConns    int
 	MaxIdleConns    int
+	ConnMaxLifetime time.Duration
+	ConnMaxIdleTime time.Duration
 }
 
 // RedisConfig holds Redis-related configuration
