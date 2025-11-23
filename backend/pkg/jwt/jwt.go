@@ -37,10 +37,10 @@ func New(cfg Config) *Service {
 // Claims represents JWT claims
 type Claims struct {
 	UserID uuid.UUID `json:"user_id"`
+	jwt.RegisteredClaims
 	Email  string    `json:"email"`
 	Role   string    `json:"role"`
 	Type   string    `json:"type"` // "access" or "refresh"
-	jwt.RegisteredClaims
 }
 
 // TokenPair represents an access and refresh token pair

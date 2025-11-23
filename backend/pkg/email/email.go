@@ -24,8 +24,8 @@ type Config struct {
 
 // Service handles email sending
 type Service struct {
-	config Config
 	dialer *gomail.Dialer
+	config Config
 }
 
 // New creates a new email service
@@ -77,24 +77,37 @@ func (s *Service) Send(msg EmailMessage) error {
 	return nil
 }
 
-// SendVerificationEmail sends an email verification email
-func (s *Service) SendVerificationEmail(to, token string) error {
-	verificationURL := fmt.Sprintf("%s://verify-email?token=%s", s.config.MobileDeepLinkScheme, token)
+// renderEmailTemplate is a helper that parses and executes an email template
+func (s *Service) renderEmailTemplate(templateName, templateContent string, data map[string]string) (string, error) {
+	t, err := template.New(templateName).Parse(templateContent)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse template: %w", err)
+	}
 
-	tmpl := `
+	var body bytes.Buffer
+	if err := t.Execute(&body, data); err != nil {
+		return "", fmt.Errorf("failed to execute template: %w", err)
+	}
+
+	return body.String(), nil
+}
+
+// getEmailTemplate returns the HTML template for the given email type
+func getEmailTemplate(heading, actionText, description, expiryText string) string {
+	return fmt.Sprintf(`
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Verify Your Email</title>
+    <title>%s</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #2563eb;">Welcome to LightShare!</h1>
-        <p>Thank you for signing up. Please verify your email address by clicking the button below:</p>
+        <h1 style="color: #2563eb;">%s</h1>
+        <p>%s</p>
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{.URL}}" style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Verify Email
+                %s
             </a>
         </div>
         <p style="color: #666; font-size: 14px;">
@@ -102,27 +115,34 @@ func (s *Service) SendVerificationEmail(to, token string) error {
             <a href="{{.URL}}">{{.URL}}</a>
         </p>
         <p style="color: #666; font-size: 14px;">
-            This link will expire in 24 hours. If you didn't create an account with LightShare, you can safely ignore this email.
+            %s
         </p>
     </div>
 </body>
 </html>
-`
+`, heading, heading, description, actionText, expiryText)
+}
 
-	t, err := template.New("verification").Parse(tmpl)
+// SendVerificationEmail sends an email verification email
+func (s *Service) SendVerificationEmail(to, token string) error {
+	verificationURL := fmt.Sprintf("%s://verify-email?token=%s", s.config.MobileDeepLinkScheme, token)
+
+	tmpl := getEmailTemplate(
+		"Welcome to LightShare!",
+		"Verify Email",
+		"Thank you for signing up. Please verify your email address by clicking the button below:",
+		"This link will expire in 24 hours. If you didn't create an account with LightShare, you can safely ignore this email.",
+	)
+
+	body, err := s.renderEmailTemplate("verification", tmpl, map[string]string{"URL": verificationURL})
 	if err != nil {
-		return fmt.Errorf("failed to parse template: %w", err)
-	}
-
-	var body bytes.Buffer
-	if err := t.Execute(&body, map[string]string{"URL": verificationURL}); err != nil {
-		return fmt.Errorf("failed to execute template: %w", err)
+		return err
 	}
 
 	return s.Send(EmailMessage{
 		To:      to,
 		Subject: "Verify your LightShare email",
-		Body:    body.String(),
+		Body:    body,
 		IsHTML:  true,
 	})
 }
@@ -131,48 +151,22 @@ func (s *Service) SendVerificationEmail(to, token string) error {
 func (s *Service) SendMagicLinkEmail(to, token string) error {
 	magicLinkURL := fmt.Sprintf("%s://magic-link?token=%s", s.config.MobileDeepLinkScheme, token)
 
-	tmpl := `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Your Magic Link</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #2563eb;">Login to LightShare</h1>
-        <p>Click the button below to securely log in to your account:</p>
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{.URL}}" style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Login to LightShare
-            </a>
-        </div>
-        <p style="color: #666; font-size: 14px;">
-            Or copy and paste this link into your browser:<br>
-            <a href="{{.URL}}">{{.URL}}</a>
-        </p>
-        <p style="color: #666; font-size: 14px;">
-            This link will expire in 15 minutes. If you didn't request this login link, you can safely ignore this email.
-        </p>
-    </div>
-</body>
-</html>
-`
+	tmpl := getEmailTemplate(
+		"Login to LightShare",
+		"Login to LightShare",
+		"Click the button below to securely log in to your account:",
+		"This link will expire in 15 minutes. If you didn't request this login link, you can safely ignore this email.",
+	)
 
-	t, err := template.New("magiclink").Parse(tmpl)
+	body, err := s.renderEmailTemplate("magiclink", tmpl, map[string]string{"URL": magicLinkURL})
 	if err != nil {
-		return fmt.Errorf("failed to parse template: %w", err)
-	}
-
-	var body bytes.Buffer
-	if err := t.Execute(&body, map[string]string{"URL": magicLinkURL}); err != nil {
-		return fmt.Errorf("failed to execute template: %w", err)
+		return err
 	}
 
 	return s.Send(EmailMessage{
 		To:      to,
 		Subject: "Your LightShare login link",
-		Body:    body.String(),
+		Body:    body,
 		IsHTML:  true,
 	})
 }
@@ -181,48 +175,22 @@ func (s *Service) SendMagicLinkEmail(to, token string) error {
 func (s *Service) SendPasswordResetEmail(to, token string) error {
 	resetURL := fmt.Sprintf("%s/reset-password?token=%s", s.config.BaseURL, token)
 
-	tmpl := `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Reset Your Password</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h1 style="color: #2563eb;">Reset Your Password</h1>
-        <p>You requested to reset your password. Click the button below to create a new password:</p>
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{.URL}}" style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Reset Password
-            </a>
-        </div>
-        <p style="color: #666; font-size: 14px;">
-            Or copy and paste this link into your browser:<br>
-            <a href="{{.URL}}">{{.URL}}</a>
-        </p>
-        <p style="color: #666; font-size: 14px;">
-            This link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.
-        </p>
-    </div>
-</body>
-</html>
-`
+	tmpl := getEmailTemplate(
+		"Reset Your Password",
+		"Reset Password",
+		"You requested to reset your password. Click the button below to create a new password:",
+		"This link will expire in 1 hour. If you didn't request a password reset, you can safely ignore this email.",
+	)
 
-	t, err := template.New("reset").Parse(tmpl)
+	body, err := s.renderEmailTemplate("reset", tmpl, map[string]string{"URL": resetURL})
 	if err != nil {
-		return fmt.Errorf("failed to parse template: %w", err)
-	}
-
-	var body bytes.Buffer
-	if err := t.Execute(&body, map[string]string{"URL": resetURL}); err != nil {
-		return fmt.Errorf("failed to execute template: %w", err)
+		return err
 	}
 
 	return s.Send(EmailMessage{
 		To:      to,
 		Subject: "Reset your LightShare password",
-		Body:    body.String(),
+		Body:    body,
 		IsHTML:  true,
 	})
 }

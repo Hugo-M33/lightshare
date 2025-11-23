@@ -26,10 +26,10 @@ type ServerConfig struct {
 // DatabaseConfig holds database-related configuration
 type DatabaseConfig struct {
 	URL             string
-	MaxOpenConns    int
-	MaxIdleConns    int
 	ConnMaxLifetime time.Duration
 	ConnMaxIdleTime time.Duration
+	MaxOpenConns    int
+	MaxIdleConns    int
 }
 
 // RedisConfig holds Redis-related configuration
