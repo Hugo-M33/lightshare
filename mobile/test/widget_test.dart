@@ -164,10 +164,10 @@ void main() {
       expect(find.text('Devices'), findsOneWidget);
       expect(find.text('Shared'), findsOneWidget);
 
-      // Check for coming soon section
-      expect(find.text('Coming Soon'), findsOneWidget);
-      expect(find.text('Connect LIFX Devices'), findsOneWidget);
-      expect(find.text('Connect Philips Hue'), findsOneWidget);
+      // Check for smart lights section
+      expect(find.text('Smart Lights'), findsOneWidget);
+      expect(find.text('Manage Accounts'), findsOneWidget);
+      expect(find.text('Share with Friends'), findsOneWidget);
 
       // Check for logout button
       expect(find.byIcon(Icons.logout), findsOneWidget);

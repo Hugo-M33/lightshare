@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:github.com)",
-      "Bash(gofmt:*)"
+      "Bash(gofmt:*)",
+      "Bash(git log:*)",
+      "Bash(go build:*)",
+      "Bash(go test:*)",
+      "Bash(/Users/hugomartin/go/bin/goimports:*)",
+      "Bash(flutter test)"
     ],
     "deny": [],
     "ask": []

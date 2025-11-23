@@ -227,29 +227,31 @@ class HomeScreen extends ConsumerWidget {
           Row(
             children: [
               const Icon(
-                Icons.construction,
+                Icons.lightbulb,
                 color: AppTheme.primaryPurple,
               ),
               const SizedBox(width: 12),
               Text(
-                'Coming Soon',
+                'Smart Lights',
                 style: Theme.of(context).textTheme.displaySmall,
               ),
             ],
           ),
           const SizedBox(height: 16),
-          _buildFeatureItem(
-            context,
-            'Connect LIFX Devices',
-            'Link your LIFX smart lights',
-            Icons.link,
-          ),
-          const SizedBox(height: 12),
-          _buildFeatureItem(
-            context,
-            'Connect Philips Hue',
-            'Add Hue lights to your account',
-            Icons.lightbulb,
+          // Clickable item to navigate to accounts
+          InkWell(
+            onTap: () => context.push('/accounts'),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: _buildFeatureItem(
+                context,
+                'Manage Accounts',
+                'Connect LIFX & Philips Hue devices',
+                Icons.link,
+                showArrow: true,
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           _buildFeatureItem(
@@ -257,6 +259,7 @@ class HomeScreen extends ConsumerWidget {
             'Share with Friends',
             'Give others access to your lights',
             Icons.share,
+            comingSoon: true,
           ),
           const SizedBox(height: 12),
           _buildFeatureItem(
@@ -264,6 +267,7 @@ class HomeScreen extends ConsumerWidget {
             'Remote Control',
             'Control lights from anywhere',
             Icons.phone_android,
+            comingSoon: true,
           ),
         ],
       ),
@@ -274,8 +278,10 @@ class HomeScreen extends ConsumerWidget {
     BuildContext context,
     String title,
     String subtitle,
-    IconData icon,
-  ) {
+    IconData icon, {
+    bool showArrow = false,
+    bool comingSoon = false,
+  }) {
     return Row(
       children: [
         Container(
@@ -291,12 +297,37 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                ),
+              Row(
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  if (comingSoon) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.accentPink.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'Soon',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppTheme.accentPink,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
               Text(
                 subtitle,
@@ -305,6 +336,12 @@ class HomeScreen extends ConsumerWidget {
             ],
           ),
         ),
+        if (showArrow)
+          const Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: AppTheme.textSecondary,
+          ),
       ],
     );
   }

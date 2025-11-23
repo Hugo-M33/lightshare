@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiClient {
   late final Dio _dio;
   final FlutterSecureStorage _secureStorage;
   final String baseUrl;
+  bool _isRefreshing = false;
 
   ApiClient({
     required this.baseUrl,
@@ -26,16 +28,26 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // Skip auth header for refresh endpoint to prevent infinite loop
+          if (options.path == '/api/v1/auth/refresh') {
+            return handler.next(options);
+          }
+
           // Add access token to requests
           final accessToken = await _secureStorage.read(key: 'access_token');
           if (accessToken != null) {
             options.headers['Authorization'] = 'Bearer $accessToken';
+            debugPrint('[ApiClient] Added auth header for ${options.path}');
+          } else {
+            debugPrint('[ApiClient] WARNING: No access token found for ${options.path}');
           }
           return handler.next(options);
         },
         onError: (error, handler) async {
           // Handle token expiration
-          if (error.response?.statusCode == 401) {
+          if (error.response?.statusCode == 401 &&
+              error.requestOptions.path != '/api/v1/auth/refresh' &&
+              !_isRefreshing) {
             final refreshed = await _refreshToken();
             if (refreshed) {
               // Retry the request with new token
@@ -58,6 +70,10 @@ class ApiClient {
   }
 
   Future<bool> _refreshToken() async {
+    // Prevent concurrent refresh attempts
+    if (_isRefreshing) return false;
+    _isRefreshing = true;
+
     try {
       final refreshToken = await _secureStorage.read(key: 'refresh_token');
       if (refreshToken == null) return false;
@@ -81,7 +97,12 @@ class ApiClient {
       }
       return false;
     } catch (e) {
+      // If refresh fails, clear tokens to force re-login
+      await _secureStorage.delete(key: 'access_token');
+      await _secureStorage.delete(key: 'refresh_token');
       return false;
+    } finally {
+      _isRefreshing = false;
     }
   }
 
