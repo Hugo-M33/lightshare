@@ -120,14 +120,27 @@ void main() {
         ),
       );
 
-      // Check for branding
-      expect(find.text('LightShare'), findsOneWidget);
-      expect(find.byIcon(Icons.lightbulb_outline), findsOneWidget);
+      // Check for header icon
+      expect(find.byIcon(Icons.person_add_outlined), findsOneWidget);
 
       // Check for signup form elements
-      expect(find.text('Create Account'), findsOneWidget);
-      expect(find.byType(TextFormField), findsNWidgets(2));
-      expect(find.text('Sign Up'), findsAtLeastNWidgets(1));
+      expect(find.text('Create Account'), findsAtLeastNWidgets(1));
+      expect(find.text('Join LightShare today'), findsOneWidget);
+      expect(find.byType(TextFormField), findsNWidgets(3));
+
+      // Check for form fields
+      expect(find.widgetWithText(TextFormField, 'Email'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Password'), findsOneWidget);
+      expect(
+          find.widgetWithText(TextFormField, 'Confirm Password'), findsOneWidget);
+
+      // Check for terms checkbox
+      expect(find.text('I agree to the Terms of Service and Privacy Policy'),
+          findsOneWidget);
+
+      // Check for sign in link
+      expect(find.text('Already have an account? '), findsOneWidget);
+      expect(find.text('Sign In'), findsOneWidget);
     });
   });
 
