@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
+import '../services/provider_service.dart';
 
 // Secure storage provider
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -34,4 +35,11 @@ final authServiceProvider = Provider<AuthService>((ref) {
   final secureStorage = ref.watch(secureStorageProvider);
 
   return AuthService(apiClient: apiClient, secureStorage: secureStorage);
+});
+
+// Provider service provider
+final providerServiceProvider = Provider<ProviderService>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+
+  return ProviderService(apiClient: apiClient);
 });

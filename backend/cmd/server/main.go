@@ -16,6 +16,7 @@ import (
 	"github.com/lightshare/backend/internal/middleware"
 	"github.com/lightshare/backend/internal/repository"
 	"github.com/lightshare/backend/internal/services"
+	"github.com/lightshare/backend/pkg/crypto"
 	"github.com/lightshare/backend/pkg/database"
 	"github.com/lightshare/backend/pkg/email"
 	"github.com/lightshare/backend/pkg/jwt"
@@ -74,8 +75,8 @@ func main() {
 	}
 	defer func() {
 		if redisClient != nil {
-			if err := redisClient.Close(); err != nil {
-				logger.Error("Failed to close Redis connection", "error", err)
+			if closeErr := redisClient.Close(); closeErr != nil {
+				logger.Error("Failed to close Redis connection", "error", closeErr)
 			}
 		}
 	}()
@@ -87,6 +88,7 @@ func main() {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db.DB)
 	refreshTokenRepo := repository.NewRefreshTokenRepository(db.DB)
+	accountRepo := repository.NewAccountRepository(db.DB)
 
 	// Initialize JWT service
 	jwtService := jwt.New(jwt.Config{
@@ -107,8 +109,19 @@ func main() {
 		MobileDeepLinkScheme: cfg.Email.MobileDeepLinkScheme,
 	})
 
+	// Load encryption key for provider tokens
+	encryptionKey, err := crypto.LoadEncryptionKey()
+	if err != nil {
+		logger.Error("Failed to load encryption key", "error", err)
+		logger.Info("To generate a new encryption key, run: openssl rand -hex 32")
+		os.Exit(1)
+	}
+
 	// Initialize auth service
 	authService := services.NewAuthService(userRepo, refreshTokenRepo, jwtService, emailService)
+
+	// Initialize provider service
+	providerService := services.NewProviderService(accountRepo, encryptionKey)
 
 	logger.Info("Services initialized successfully")
 
@@ -125,7 +138,7 @@ func main() {
 	middleware.Setup(app)
 
 	// Setup routes
-	setupRoutes(app, authService, jwtService)
+	setupRoutes(app, authService, providerService, jwtService)
 
 	// Start server in goroutine
 	go func() {
@@ -155,7 +168,7 @@ func main() {
 	logger.Info("Server stopped")
 }
 
-func setupRoutes(app *fiber.App, authService *services.AuthService, jwtService *jwt.Service) {
+func setupRoutes(app *fiber.App, authService *services.AuthService, providerService *services.ProviderService, jwtService *jwt.Service) {
 	// Health check endpoints
 	app.Get("/health", handlers.Health(version))
 	app.Get("/ready", handlers.Ready())
@@ -165,6 +178,7 @@ func setupRoutes(app *fiber.App, authService *services.AuthService, jwtService *
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
+	providerHandler := handlers.NewProviderHandler(providerService)
 
 	// Auth routes
 	auth := v1.Group("/auth")
@@ -181,11 +195,14 @@ func setupRoutes(app *fiber.App, authService *services.AuthService, jwtService *
 	auth.Get("/me", authMiddleware, authHandler.Me)
 	auth.Post("/logout-all", authMiddleware, authHandler.LogoutAll)
 
-	// Account routes (to be implemented in Phase 3)
-	_ = v1.Group("/accounts")
+	// Provider routes (protected)
+	providers := v1.Group("/providers", authMiddleware)
+	providers.Post("/connect", providerHandler.ConnectProvider)
 
-	// Provider routes (to be implemented in Phase 3)
-	_ = v1.Group("/providers")
+	// Account routes (protected)
+	accounts := v1.Group("/accounts", authMiddleware)
+	accounts.Get("", providerHandler.ListAccounts)
+	accounts.Delete("/:id", providerHandler.DisconnectAccount)
 }
 
 func errorHandler(c *fiber.Ctx, err error) error {
