@@ -46,13 +46,13 @@ type JWTConfig struct {
 
 // EmailConfig holds email-related configuration
 type EmailConfig struct {
-	SMTPHost            string
-	SMTPPort            string
-	SMTPUsername        string
-	SMTPPassword        string
-	FromEmail           string
-	FromName            string
-	BaseURL             string
+	SMTPHost             string
+	SMTPPort             string
+	SMTPUsername         string
+	SMTPPassword         string
+	FromEmail            string
+	FromName             string
+	BaseURL              string
 	MobileDeepLinkScheme string
 }
 
@@ -81,13 +81,13 @@ func Load() *Config {
 			RefreshExpiration: getDurationEnv("JWT_REFRESH_EXPIRATION", 30*24*time.Hour),
 		},
 		Email: EmailConfig{
-			SMTPHost:            getEnv("SMTP_HOST", "localhost"),
-			SMTPPort:            getEnv("SMTP_PORT", "1025"),
-			SMTPUsername:        getEnv("SMTP_USERNAME", ""),
-			SMTPPassword:        getEnv("SMTP_PASSWORD", ""),
-			FromEmail:           getEnv("EMAIL_FROM", "noreply@lightshare.com"),
-			FromName:            getEnv("EMAIL_FROM_NAME", "LightShare"),
-			BaseURL:             getEnv("APP_BASE_URL", "http://localhost:8080"),
+			SMTPHost:             getEnv("SMTP_HOST", "localhost"),
+			SMTPPort:             getEnv("SMTP_PORT", "1025"),
+			SMTPUsername:         getEnv("SMTP_USERNAME", ""),
+			SMTPPassword:         getEnv("SMTP_PASSWORD", ""),
+			FromEmail:            getEnv("EMAIL_FROM", "noreply@lightshare.com"),
+			FromName:             getEnv("EMAIL_FROM_NAME", "LightShare"),
+			BaseURL:              getEnv("APP_BASE_URL", "http://localhost:8080"),
 			MobileDeepLinkScheme: getEnv("MOBILE_DEEP_LINK_SCHEME", "lightshare"),
 		},
 	}

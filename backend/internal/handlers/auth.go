@@ -23,6 +23,18 @@ func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 	}
 }
 
+// parseRequestBody parses the request body and sends an error response if parsing fails.
+// Returns true if an error occurred (and error response was sent), false otherwise.
+func parseRequestBody(c *fiber.Ctx, req interface{}) bool {
+	if err := c.BodyParser(req); err != nil {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid request body",
+		})
+		return true
+	}
+	return false
+}
+
 // SignupRequest represents the signup request body
 type SignupRequest struct {
 	Email    string `json:"email"`
@@ -32,10 +44,8 @@ type SignupRequest struct {
 // Signup handles user signup
 func (h *AuthHandler) Signup(c *fiber.Ctx) error {
 	var req SignupRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid request body",
-		})
+	if parseRequestBody(c, &req) {
+		return nil
 	}
 
 	// Call auth service
@@ -77,10 +87,8 @@ type LoginRequest struct {
 // Login handles user login
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req LoginRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid request body",
-		})
+	if parseRequestBody(c, &req) {
+		return nil
 	}
 
 	// Get user agent and IP address
@@ -120,10 +128,8 @@ type VerifyEmailRequest struct {
 // VerifyEmail handles email verification
 func (h *AuthHandler) VerifyEmail(c *fiber.Ctx) error {
 	var req VerifyEmailRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid request body",
-		})
+	if parseRequestBody(c, &req) {
+		return nil
 	}
 
 	// Get user agent and IP address
@@ -155,10 +161,8 @@ type MagicLinkRequest struct {
 // RequestMagicLink handles magic link request
 func (h *AuthHandler) RequestMagicLink(c *fiber.Ctx) error {
 	var req MagicLinkRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid request body",
-		})
+	if parseRequestBody(c, &req) {
+		return nil
 	}
 
 	// Call auth service
@@ -181,10 +185,8 @@ type LoginWithMagicLinkRequest struct {
 // LoginWithMagicLink handles login with magic link
 func (h *AuthHandler) LoginWithMagicLink(c *fiber.Ctx) error {
 	var req LoginWithMagicLinkRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid request body",
-		})
+	if parseRequestBody(c, &req) {
+		return nil
 	}
 
 	// Get user agent and IP address
@@ -216,10 +218,8 @@ type RefreshTokenRequest struct {
 // RefreshToken handles token refresh
 func (h *AuthHandler) RefreshToken(c *fiber.Ctx) error {
 	var req RefreshTokenRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid request body",
-		})
+	if parseRequestBody(c, &req) {
+		return nil
 	}
 
 	// Get user agent and IP address
@@ -251,10 +251,8 @@ type LogoutRequest struct {
 // Logout handles user logout
 func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 	var req LogoutRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid request body",
-		})
+	if parseRequestBody(c, &req) {
+		return nil
 	}
 
 	// Call auth service

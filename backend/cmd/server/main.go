@@ -58,11 +58,15 @@ func main() {
 	redisClient, err := redis.New(redis.Config{
 		URL: cfg.Redis.URL,
 	})
+	defer func() {
+		if redisClient != nil {
+			redisClient.Close()
+		}
+	}()
 	if err != nil {
 		logger.Error("Failed to connect to Redis", "error", err)
 		os.Exit(1)
 	}
-	defer redisClient.Close()
 	logger.Info("Redis connected successfully")
 
 	// Initialize services
@@ -80,7 +84,7 @@ func main() {
 	})
 
 	// Initialize email service
-	emailService := email.New(email.Config{
+	emailService := email.New(&email.Config{
 		SMTPHost:            cfg.Email.SMTPHost,
 		SMTPPort:            cfg.Email.SMTPPort,
 		SMTPUsername:        cfg.Email.SMTPUsername,

@@ -8,25 +8,25 @@ import (
 
 // User represents a user in the system
 type User struct {
-	ID                        uuid.UUID  `db:"id" json:"id"`
-	Email                     string     `db:"email" json:"email"`
-	PasswordHash              string     `db:"password_hash" json:"-"`
-	EmailVerified             bool       `db:"email_verified" json:"email_verified"`
-	EmailVerificationToken    *string    `db:"email_verification_token" json:"-"`
+	ID                         uuid.UUID  `db:"id" json:"id"`
+	Email                      string     `db:"email" json:"email"`
+	PasswordHash               string     `db:"password_hash" json:"-"`
+	EmailVerified              bool       `db:"email_verified" json:"email_verified"`
+	EmailVerificationToken     *string    `db:"email_verification_token" json:"-"`
 	EmailVerificationExpiresAt *time.Time `db:"email_verification_expires_at" json:"-"`
-	MagicLinkToken            *string    `db:"magic_link_token" json:"-"`
-	MagicLinkExpiresAt        *time.Time `db:"magic_link_expires_at" json:"-"`
-	StripeCustomerID          *string    `db:"stripe_customer_id" json:"stripe_customer_id,omitempty"`
-	Role                      string     `db:"role" json:"role"`
-	CreatedAt                 time.Time  `db:"created_at" json:"created_at"`
-	UpdatedAt                 time.Time  `db:"updated_at" json:"updated_at"`
+	MagicLinkToken             *string    `db:"magic_link_token" json:"-"`
+	MagicLinkExpiresAt         *time.Time `db:"magic_link_expires_at" json:"-"`
+	StripeCustomerID           *string    `db:"stripe_customer_id" json:"stripe_customer_id,omitempty"`
+	Role                       string     `db:"role" json:"role"`
+	CreatedAt                  time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt                  time.Time  `db:"updated_at" json:"updated_at"`
 }
 
 // CreateUserParams holds parameters for creating a new user
 type CreateUserParams struct {
-	Email                  string
-	PasswordHash           string
-	EmailVerificationToken string
+	Email                      string
+	PasswordHash               string
+	EmailVerificationToken     string
 	EmailVerificationExpiresAt time.Time
 }
 

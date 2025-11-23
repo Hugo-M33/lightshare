@@ -29,7 +29,7 @@ type Service struct {
 }
 
 // New creates a new email service
-func New(cfg Config) *Service {
+func New(cfg *Config) *Service {
 	port, err := strconv.Atoi(cfg.SMTPPort)
 	if err != nil {
 		port = 587 // default to standard SMTP submission port
@@ -40,7 +40,7 @@ func New(cfg Config) *Service {
 	dialer.SSL = (port == 465)
 
 	return &Service{
-		config: cfg,
+		config: *cfg,
 		dialer: dialer,
 	}
 }
@@ -240,7 +240,7 @@ func ValidateEmail(email string) bool {
 	if len(parts) != 2 {
 		return false
 	}
-	if len(parts[0]) == 0 || len(parts[1]) < 3 {
+	if parts[0] == "" || len(parts[1]) < 3 {
 		return false
 	}
 	if !strings.Contains(parts[1], ".") {
